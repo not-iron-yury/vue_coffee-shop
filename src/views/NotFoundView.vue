@@ -2,6 +2,8 @@
 
 <template>
   <main>
-    <h1>О нас</h1>
+    <h1>Страница не найне</h1>
   </main>
 </template>
+
+<style lang="scss"></style>

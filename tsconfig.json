@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "strict": true,
+    "removeComments": false,
+    "outDir": "src/javascript",
+    "sourceMap": false,
+    "noEmitOnError": true,
+    "alwaysStrict": true,
+    "allowUnreachableCode": false
+  },
+  "include": ["src/typescript/**/*.ts"],
+  "exclude": ["node_modules"],
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    },
+    {
+      "path": "./tsconfig.app.json"
+    }
+  ]
+}

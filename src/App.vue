@@ -1,19 +1,21 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterView } from 'vue-router'
+import AppHeader from './components/layout/AppHeader.vue'
+import AppFooter from './components/layout/AppFooter.vue'
 </script>
 
 <template>
-  <header>
-    <div class="wrapper">
-      <nav>
-        <RouterLink to="/">Главная</RouterLink>
-        <RouterLink to="/about">О нас</RouterLink>
-        <RouterLink to="/cart">Корзина</RouterLink>
-      </nav>
+  <app-header />
+  <main class="main">
+    <div class="container">
+      <RouterView />
     </div>
-  </header>
-
-  <RouterView />
+  </main>
+  <app-footer />
 </template>
 
-<style scoped></style>
+<style scoped>
+.main {
+  flex-grow: 1;
+}
+</style>

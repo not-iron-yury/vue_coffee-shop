@@ -2,7 +2,7 @@
 
 <template>
   <main>
-    <h1>Главная страница</h1>
+    <h1 class="title-h1">Главная страница</h1>
   </main>
 </template>
 

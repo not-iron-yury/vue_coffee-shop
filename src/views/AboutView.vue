@@ -2,6 +2,6 @@
 
 <template>
   <main>
-    <h1>О нас</h1>
+    <h1 class="title-h1">О нас</h1>
   </main>
 </template>

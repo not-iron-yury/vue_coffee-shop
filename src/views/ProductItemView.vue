@@ -2,7 +2,7 @@
 
 <template>
   <main>
-    <h1>Карточка товара</h1>
+    <h1 class="title-h1">Карточка товара</h1>
   </main>
 </template>
 

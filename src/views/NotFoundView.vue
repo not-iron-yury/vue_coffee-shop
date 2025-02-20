@@ -2,7 +2,7 @@
 
 <template>
   <main>
-    <h1>Страница не найне</h1>
+    <h1 class="title-h1">Страница не найне</h1>
   </main>
 </template>
 

@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import { isValidLabel } from '../validators'
+
 defineProps({
   label: {
     type: String,
     default: 'Жмак',
-    validator: (itm: unknown): boolean => typeof itm === 'string',
+    validator: isValidLabel,
   },
 })
 </script>

@@ -3,6 +3,6 @@ export interface IProduct {
   price: number
   title: string
   img: string
-  descr: string
+  weight: number
   topSelling: boolean
 }

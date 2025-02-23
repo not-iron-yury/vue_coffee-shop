@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import InputNumber from './InputNumber.vue'
 import AppButton from './AppButton.vue'
-import { isValidPrice, isValidLabel } from '../validators'
+import { isValidPrice, isValidLabel, isValidWeight } from '../validators'
 
 const count = ref<number>(0)
 
@@ -17,10 +17,10 @@ defineProps({
     required: true,
     validator: isValidLabel,
   },
-  descr: {
-    type: String,
+  weight: {
+    type: Number,
     required: false,
-    validator: isValidLabel,
+    validator: isValidWeight,
   },
   img: {
     type: String,
@@ -34,8 +34,7 @@ defineProps({
   <article class="product">
     <img class="product__img" :src="`/img/products/${img}`" aria-hidden="true" />
     <p class="product__price">{{ price }} руб.</p>
-    <h3 class="product__title">{{ title }}</h3>
-    <p class="product__descr">{{ descr }}</p>
+    <h3 class="product__title">{{ title }}, {{ weight }} г</h3>
     <div class="product__actions">
       <InputNumber v-model="count" :min="1" :max="100" />
       <AppButton label="Заказать" />
@@ -62,16 +61,9 @@ defineProps({
   &__title {
     margin-bottom: 15px;
     font-weight: 600;
-    font-size: 32px;
+    font-size: 28px;
     line-height: 130%;
   }
-
-  &__descr {
-    margin-bottom: 30px;
-    line-height: 160%;
-    opacity: 0.6;
-  }
-
   &__actions {
     display: flex;
     align-items: center;

@@ -1,26 +1,18 @@
 <script setup lang="ts">
 import ProductCard from '../components/ProductCard.vue'
+import { getBestProducts } from '../API'
+import { onMounted, ref } from 'vue'
+import type { IProduct } from '@/inretfaces'
 
-const items = [
-  {
-    price: 500,
-    title: 'Бразильские зерна',
-    descr: 'Кофе, который ты всегда готовишь сам так, как тебе нравится.',
-    img: '1.jpg',
-  },
-  {
-    price: 600,
-    title: 'Вьетнамские зерна',
-    descr: 'Кофе, который ты всегда готовишь сам так, как тебе нравится.',
-    img: '1.jpg',
-  },
-  {
-    price: 700,
-    title: 'Африканские зерна',
-    descr: 'Кофе, который ты всегда готовишь сам так, как тебе нравится.',
-    img: '1.jpg',
-  },
-]
+const products = ref<IProduct[]>()
+
+onMounted(async (): Promise<void> => {
+  try {
+    products.value = await getBestProducts()
+  } catch (error) {
+    console.error(error)
+  }
+})
 </script>
 
 <template>
@@ -28,10 +20,15 @@ const items = [
 
   <section class="products">
     <h2 class="title-h2 products__title">Это Наше Лучшее Предложение</h2>
-    <p class="products__descr">Кофейня поможет вам рассказать аудитории о вашем бизнесе.</p>
+    <p class="products__descr">Кофе поможет рассказать вашей аудитории о вашем бизнесе.</p>
     <ul class="products__list">
-      <li v-for="(item, i) in items" :key="i" class="products__item">
-        <ProductCard :price="item.price" :title="item.title" :descr="item.descr" :img="item.img" />
+      <li v-for="(item, i) in products" :key="i" class="products__item">
+        <ProductCard
+          :price="item.price"
+          :title="item.title"
+          :weight="item.weight"
+          :img="item.img"
+        />
       </li>
     </ul>
   </section>

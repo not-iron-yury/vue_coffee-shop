@@ -11,6 +11,7 @@ import { RouterLink } from 'vue-router'
       <nav class="nav header__nav">
         <RouterLink to="/">Главная</RouterLink>
         <RouterLink to="/about">О нас</RouterLink>
+        <RouterLink to="/catalog">Каталог</RouterLink>
         <RouterLink to="/cart">Корзина</RouterLink>
       </nav>
     </div>

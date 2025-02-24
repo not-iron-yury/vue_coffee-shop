@@ -15,3 +15,7 @@
   line-height: 130%;
   color: var(--color-dark);
 }
+
+.hidden {
+  overflow: hidden;
+}

@@ -2,11 +2,9 @@
 import { defineProps, defineEmits, ref } from 'vue'
 import AppButton from './AppButton.vue'
 import { removeOverflowHidden } from '../functions'
+import type { FormData } from '../inretfaces'
 
-interface FormData {
-  email: string
-  password: string
-}
+const isAuth = ref<boolean>(true)
 
 defineProps({
   showOverlay: {
@@ -36,7 +34,10 @@ const closeOverlay = () => {
   <div class="overlay" @click.self="closeOverlay">
     <form class="form" @submit.prevent="submitForm">
       <button class="form__btn-close" type="button" @click="closeOverlay">&times;</button>
-      <h2 class="form__title">Авторизация</h2>
+
+      <h2 class="form__title">
+        {{ isAuth ? 'Авторизация' : 'Регистрация' }}
+      </h2>
 
       <fieldset class="form__fieldset">
         <label for="email" class="form__label">
@@ -54,7 +55,16 @@ const closeOverlay = () => {
           />
         </label>
       </fieldset>
-      <app-button label="Войти" class="form__bnt-submit" />
+
+      <app-button :label="isAuth ? 'Войти' : 'Зарегиться'" class="form__bnt-submit" />
+
+      <p class="form__status">
+        {{ isAuth ? 'Еще не зарегистрировались?' : 'Уже зарегистрированы?' }}
+
+        <button class="form__bnt-status" @click="isAuth = !isAuth">
+          {{ isAuth ? 'Регистрация' : 'Войти' }}
+        </button>
+      </p>
     </form>
   </div>
 </template>
@@ -97,7 +107,6 @@ const closeOverlay = () => {
     opacity: 0.5;
   }
   &__bnt-submit {
-    background-color: #f44336;
   }
   &__title {
     margin-bottom: 20px;
@@ -110,6 +119,17 @@ const closeOverlay = () => {
   &__label {
     display: grid;
     gap: 5px;
+  }
+
+  &__status {
+    padding: 10px 0 0;
+    font-size: 14px;
+    text-align: center;
+
+    & button {
+      padding: 4px;
+      color: #f44336;
+    }
   }
 }
 

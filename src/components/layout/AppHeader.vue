@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
-import AppPopup from '../AppPopup.vue'
+import AppPopupAuth from '../AppPopupAuth.vue'
 import { ref } from 'vue'
 import { getScrollbarWidth, addOverflowHidden } from '../../functions'
 
@@ -32,7 +32,7 @@ const openAuth = () => {
         </RouterLink>
       </nav>
     </div>
-    <AppPopup v-show="showOverlay" @close="showOverlay = false" />
+    <app-popup-auth v-show="showOverlay" @close="showOverlay = false" />
   </header>
 </template>
 

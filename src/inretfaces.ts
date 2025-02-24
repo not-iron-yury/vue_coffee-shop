@@ -6,3 +6,8 @@ export interface IProduct {
   weight: number
   topSelling: boolean
 }
+
+export interface FormData {
+  email: string
+  password: string
+}

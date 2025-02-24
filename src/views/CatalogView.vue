@@ -1,25 +1,25 @@
 <script setup lang="ts">
 import ProductCard from '../components/ProductCard.vue'
-import { getProducts } from '../API'
-import { onMounted, ref } from 'vue'
-import type { IProduct } from '@/inretfaces'
+import { useProductsStore } from '@/stores/productsStore'
 
-const products = ref<IProduct[]>()
+const productsStore = useProductsStore()
 
-onMounted(async (): Promise<void> => {
+async function loadData() {
   try {
-    products.value = await getProducts()
-  } catch (error) {
-    console.error(error)
+    await productsStore.getProducts()
+  } catch (err) {
+    console.error(err)
   }
-})
+}
+
+loadData()
 </script>
 
 <template>
   <h1 class="title-h1">Каталог</h1>
   <section class="products">
     <ul class="products__list">
-      <li v-for="(item, i) in products" :key="i" class="products__item">
+      <li v-for="(item, i) in productsStore.items" :key="i" class="products__item">
         <ProductCard
           :price="item.price"
           :title="item.title"

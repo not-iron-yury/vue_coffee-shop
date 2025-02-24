@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import ProductCard from '../components/ProductCard.vue'
-import { getBestProducts } from '../API'
-import { onMounted, ref } from 'vue'
-import type { IProduct } from '@/inretfaces'
+import { useProductsStore } from '@/stores/productsStore'
 
-const products = ref<IProduct[]>()
+const productsStore = useProductsStore()
 
-onMounted(async (): Promise<void> => {
+async function loadData() {
   try {
-    products.value = await getBestProducts()
-  } catch (error) {
-    console.error(error)
+    await productsStore.getProducts()
+  } catch (err) {
+    console.error(err)
   }
-})
+}
+
+loadData()
 </script>
 
 <template>
@@ -22,7 +22,7 @@ onMounted(async (): Promise<void> => {
     <h2 class="title-h2 products__title">Это Наше Лучшее Предложение</h2>
     <p class="products__descr">Кофе поможет рассказать вашей аудитории о вашем бизнесе.</p>
     <ul class="products__list">
-      <li v-for="(item, i) in products" :key="i" class="products__item">
+      <li v-for="(item, i) in productsStore.itemsBest" :key="i" class="products__item">
         <ProductCard
           :price="item.price"
           :title="item.title"

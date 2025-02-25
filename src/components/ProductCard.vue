@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import InputNumber from './InputNumber.vue'
+import AppInputNumber from './AppInputNumber.vue'
 import AppButton from './AppButton.vue'
+import AppFavoriteStatus from './AppFavoriteStatus.vue'
 import { isValidPrice, isValidLabel, isValidWeight } from '../validators'
-
 const count = ref<number>(0)
 
 defineProps({
@@ -32,12 +32,19 @@ defineProps({
 
 <template>
   <article class="product">
+    <div class="product__favorite-wrapper">
+      <app-favorite-status
+        :favorite="true"
+        class="product__favorite"
+        @click="console.log('click')"
+      />
+    </div>
     <img class="product__img" :src="`/img/products/${img}`" aria-hidden="true" />
     <p class="product__price">{{ price }} руб.</p>
     <h3 class="product__title">{{ title }}, {{ weight }} г</h3>
     <div class="product__actions">
-      <InputNumber v-model="count" :min="1" :max="100" />
-      <AppButton label="Заказать" />
+      <app-input-number v-model="count" :min="1" :max="100" />
+      <app-button label="Заказать" />
     </div>
   </article>
 </template>
@@ -46,6 +53,16 @@ defineProps({
 .product {
   padding: 5px;
   max-width: 310px;
+
+  &__favorite-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+  }
+  &__favorite {
+    padding: 3px;
+    height: 30px;
+  }
 
   &__img {
     margin-bottom: 35px;

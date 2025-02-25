@@ -7,7 +7,19 @@ export interface IProduct {
   topSelling: boolean
 }
 
-export interface FormData {
+export interface IFormData {
+  fullName?: string
   email: string
   password: string
+}
+
+export interface IUser {
+  id: number
+  fullName: string
+  email: string
+}
+
+export interface IUserData {
+  token: string
+  data: IUser
 }

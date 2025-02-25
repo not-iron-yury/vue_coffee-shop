@@ -1,28 +1,42 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-// import { defineProps, defineEmits, ref, reactive } from 'vue'
 import AppButton from './AppButton.vue'
 import { removeOverflowHidden } from '../functions'
+import { useAuthStore } from '../stores/authStore'
 import type { IFormData } from '../inretfaces'
 
-const isAuth = ref<boolean>(false)
+const authStore = useAuthStore()
+const emit = defineEmits(['close'])
+
+const isAuth = ref<boolean>(true)
 const formData = reactive<IFormData>({
   fullName: '',
   email: '',
   password: '',
 })
 
-const submitForm = () => {
-  if (formData.email && formData.password) {
-    console.log(formData)
-  }
+const resetInputs = (): void => {
+  formData.fullName = ''
+  formData.email = ''
+  formData.password = ''
 }
-
-const emit = defineEmits(['close'])
 
 const closeOverlay = () => {
   emit('close')
   removeOverflowHidden()
+}
+
+const submitForm = () => {
+  if (formData.email && formData.password) {
+    if (!isAuth.value) {
+      authStore.register(formData)
+    } else {
+      authStore.login(formData)
+    }
+
+    closeOverlay()
+    resetInputs()
+  }
 }
 </script>
 

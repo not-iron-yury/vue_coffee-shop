@@ -2,16 +2,28 @@
 import { RouterLink } from 'vue-router'
 import AppPopUp from '../AppPopUp.vue'
 import AppFormAuth from '../AppFormAuth.vue'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { getScrollbarWidth, addOverflowHidden } from '../../functions'
+import { useAuthStore } from '@/stores/authStore'
+
+const authStore = useAuthStore()
 
 const showOverlay = ref(false)
 
 const openAuth = () => {
   showOverlay.value = true
-
   const width = getScrollbarWidth()
   addOverflowHidden(width)
+}
+
+const authImg = computed(() => (authStore.isAuthenticated ? '/logout.svg' : '/auth.svg'))
+
+const authhandler = (): void => {
+  if (authStore.isAuthenticated) {
+    authStore.logout()
+  } else {
+    openAuth()
+  }
 }
 </script>
 
@@ -25,8 +37,8 @@ const openAuth = () => {
         <RouterLink to="/">Главная</RouterLink>
         <RouterLink to="/about">О нас</RouterLink>
         <RouterLink to="/catalog">Каталог</RouterLink>
-        <button class="nav-btn" @click="openAuth">
-          <img src="/auth.svg" aria-label="Авторизоваться" title="Авторизоваться" class="nav-img" />
+        <button class="nav-btn" @click="authhandler">
+          <img :src="authImg" aria-label="Авторизоваться" title="Авторизоваться" class="nav-img" />
         </button>
         <RouterLink to="/cart" class="nav-link">
           <img src="/cart.svg" aria-label="Корзина" title="Корзина" class="nav-img" />

@@ -23,3 +23,10 @@ export interface IUserData {
   token: string
   data: IUser
 }
+
+export interface IUserProducts {
+  id?: number
+  user_id: string
+  favorites: number[]
+  cart: number[]
+}

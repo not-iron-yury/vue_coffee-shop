@@ -31,7 +31,24 @@ export const useUserProductsStore = defineStore('userProducts', () => {
     }
   }
 
-  return { userProducts, createUserProductsData }
+  // получаем данные о товарах пользователя после авторизации
+  const getUserProductsData = async (userId: number): Promise<void> => {
+    try {
+      const res = await fetch(url + '/userproducts?user_id=' + userId)
+      if (!res.ok) {
+        throw new Error('Ошибка при попытке получить данные о товарах пользователя.')
+      }
+
+      const response = await res.json()
+      userProducts.value = response[0]
+
+      console.log(response[0])
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  return { userProducts, createUserProductsData, getUserProductsData }
 })
 
 /*

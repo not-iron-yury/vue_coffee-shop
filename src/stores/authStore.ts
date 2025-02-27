@@ -2,10 +2,12 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { url } from '../API'
 import type { IUser, IFormData, IUserData } from '../inretfaces'
+import { useUserProductsStore } from './userProductsStore'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<IUser | null>(null)
   const isAuthenticated = ref<boolean>(false)
+  const userProductsStore = useUserProductsStore()
 
   const dataProcessing = (response: IUserData): void => {
     user.value = response.data
@@ -28,6 +30,10 @@ export const useAuthStore = defineStore('auth', () => {
 
       const response = await res.json()
       dataProcessing(response)
+
+      // после успешной регистрации создаем второй документ связанный с пользователем,
+      // для хранения избранных товаров и товаров в корзине
+      await userProductsStore.createUserProductsData(response.data.id)
     } catch (error) {
       console.error(error)
     }
@@ -50,8 +56,9 @@ export const useAuthStore = defineStore('auth', () => {
       if (!res.ok) throw new Error('В процессе авторизации возникла ошибка.')
 
       const response = await res.json()
-
       dataProcessing(response)
+
+      await userProductsStore.getUserProductsData(response.data.id)
     } catch (error) {
       console.error(error)
     }

@@ -1,14 +1,31 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { reactive } from 'vue'
 import { url } from '../API'
 import type { IUserProducts, listName } from '../inretfaces'
 import { useAuthStore } from './authStore'
+import { LIST_CART, LIST_FAVORITES } from '@/constans'
 
 export const useUserProductsStore = defineStore('userProducts', () => {
   const authStore = useAuthStore()
-  const userProducts = ref<IUserProducts | null>(null)
+  const userProducts = reactive<IUserProducts>({
+    id: 0,
+    user_id: 0,
+    favorites: [],
+    cart: [],
+  })
 
-  // создаем на бэке объект для хранения данных о корзине и избранном
+  const toggleProductInUserProducts = (listName: listName, productId: number): void => {
+    if (userProducts![listName].includes(productId)) {
+      const index = userProducts![listName].indexOf(productId)
+      userProducts![listName].splice(index, 1) // удаляем, если товар уже есть в списке
+    } else {
+      userProducts![listName].push(productId) // добавляем, если товара нет в списке
+    }
+
+    setUserProductsData(listName, userProducts![listName])
+  }
+
+  // создаем на бэке объект для хранения данных товарах пользователя (после успешной регистрации !!)
   const createUserProductsData = async (userId: number): Promise<void> => {
     try {
       const res = await fetch(url + '/userproducts', {
@@ -17,31 +34,22 @@ export const useUserProductsStore = defineStore('userProducts', () => {
           Accept: 'application/json',
           'Content-Type': 'application/json',
         },
+        // все что пользователь натыкал до регистрации, будет сохранено на бэке после успешной регистрации
         body: JSON.stringify({
           user_id: userId,
-          favorites: [],
-          cart: [],
+          favorites: userProducts.favorites,
+          cart: userProducts.cart,
         }),
       })
 
       if (!res.ok)
         throw new Error('Ошибка при попытке создать данные о товарах нового пользователя.')
-
-      // добавляем в стейт аналогичный объект с пустыми списками (после регистрации иного варианта не может и быть)
-      if (authStore.user) {
-        userProducts.value = {
-          id: authStore.user.id, // тут скользкий момент, т.к. id присваивается автоматом на бэке. есть возможность получить разые значения, и тогда будет пездец.
-          user_id: authStore.user.id,
-          favorites: [],
-          cart: [],
-        }
-      }
     } catch (error) {
       console.error(error)
     }
   }
 
-  // получаем данные о товарах пользователя после авторизации
+  // получаем данные о товарах пользователя с бэка  / сразу же! после авторизации!!
   const getUserProductsData = async (userId: number): Promise<void> => {
     try {
       const res = await fetch(url + '/userproducts?user_id=' + userId)
@@ -50,30 +58,38 @@ export const useUserProductsStore = defineStore('userProducts', () => {
       }
 
       const response = await res.json()
-      userProducts.value = response[0]
+      const data = response[0] as IUserProducts
 
-      console.log(response[0])
+      // --------------------------------------------- //
+      // синхронизация локальных данных с бэком
+      userProducts.id = data.id
+      userProducts.user_id = data.user_id
+
+      if (userProducts.favorites.length) {
+        // если пользователь натыкал что-то до авторизации, то пушим данные с бэка в локальный список и отправляем все на бэк
+        userProducts.favorites.push(...data.favorites)
+        setUserProductsData(LIST_FAVORITES, userProducts.favorites)
+      } else {
+        // если локальный список пустой, то просто подменяем его
+        userProducts.favorites = data.favorites
+      }
+
+      if (userProducts.cart.length) {
+        userProducts.cart.push(...data.cart)
+        setUserProductsData(LIST_CART, userProducts.cart)
+      } else {
+        userProducts.cart = data.cart
+      }
+      // --------------------------------------------- //
     } catch (err) {
       console.error(err)
     }
   }
 
-  // меняем данные в стейте userProducts
-  const changeUserProductsState = (listName: listName, productId: number): void => {
-    if (userProducts.value![listName].includes(productId)) {
-      const index = userProducts.value![listName].indexOf(productId)
-      userProducts.value![listName].splice(index, 1) // удаляем, если товар уже есть в списке
-    } else {
-      userProducts.value![listName].push(productId) // добавляем, если товара нет в списке
-    }
-  }
-
-  // обновляем данные о товарах пользователя
-  const setUserProductsData = async (listName: listName, productId: number): Promise<void> => {
+  // обновляем данные о товарах пользователя на бэке
+  const setUserProductsData = async (listName: listName, newList: number[]): Promise<void> => {
     try {
-      if (authStore.user && userProducts.value) {
-        changeUserProductsState(listName, productId) // меняем данные в стейте userProducts
-
+      if (authStore.user) {
         const res = await fetch(`${url}/userproducts/${authStore.user.id}`, {
           method: 'PATCH',
           headers: {
@@ -81,56 +97,22 @@ export const useUserProductsStore = defineStore('userProducts', () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            [listName]: userProducts.value![listName],
+            [listName]: newList,
           }),
         })
 
         if (!res.ok) throw new Error('В процессе регистрации возникла ошибка.')
-
-        const response = await res.json()
-        console.log(response)
       }
     } catch (error) {
       console.error(error)
     }
   }
 
-  return { userProducts, createUserProductsData, getUserProductsData, setUserProductsData }
+  return {
+    userProducts,
+    toggleProductInUserProducts,
+    createUserProductsData,
+    getUserProductsData,
+    setUserProductsData,
+  }
 })
-
-/*
-1. при регистрации создавать объект в коллекции favorites на бэке
-    {
-        "id": 1,
-        "user_id": 1,
-        "list": []
-    },
-
-2. при авторизации запрошивать эти данные с бэка
-3. добавление или удаление через PATCH (мы знаем id самого объекта, см. пункты 1 и 2)
-
-// PATCH https://d774fe2b8f07493b.mokky.dev/favorites/1
-
-{
-  "list": [1, 4, 2]
-}
-
-4. если в локальном сторе есть данные, то :
-  1) их нужно добавить в list
-  2) ререндер карточек
-  3) отправить данные на бэк
-
-5. в объект описывающий товар добавить свойство userFavorite: boolean
-  и менять его значение при обновлении данных в list
-
-6. удаление id из  list
-
-
-const index = state.array.indexOf(valueToRemove); // Поиск индекса элемента
-
-// Проверка существования элемента
-if (index !== -1) {
-  state.array.splice(index, 1);   // Удаление элемента по найденному индексу
-}
-
-*/

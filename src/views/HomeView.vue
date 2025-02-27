@@ -24,6 +24,7 @@ loadData()
     <ul class="products__list">
       <li v-for="(item, i) in productsStore.itemsBest" :key="i" class="products__item">
         <ProductCard
+          :id="item.id"
           :price="item.price"
           :title="item.title"
           :weight="item.weight"

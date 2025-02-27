@@ -4,7 +4,7 @@ import { ref } from 'vue'
 const props = defineProps({
   modelValue: {
     type: Number,
-    default: 0,
+    default: 1,
   },
   min: {
     type: Number,
@@ -18,7 +18,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-const value = ref<number>(0)
+const value = ref<number>(1)
 
 function increment() {
   if (value.value < props.max) {

@@ -17,4 +17,4 @@ export const isValidLabel = (value: unknown): boolean => {
 }
 
 const isString = (value: unknown): boolean => typeof value === 'string'
-const isNumber = (value: unknown): boolean => typeof value === 'number'
+export const isNumber = (value: unknown): boolean => typeof value === 'number'

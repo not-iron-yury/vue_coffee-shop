@@ -3,10 +3,18 @@ import { ref } from 'vue'
 import AppInputNumber from './AppInputNumber.vue'
 import AppButton from './AppButton.vue'
 import AppFavoriteStatus from './AppFavoriteStatus.vue'
-import { isValidPrice, isValidLabel, isValidWeight } from '../validators'
+import { isValidPrice, isValidLabel, isValidWeight, isNumber } from '../validators'
+import { useUserProductsStore } from '@/stores/userProductsStore'
+
+const userProductsStore = useUserProductsStore()
 const count = ref<number>(0)
 
 defineProps({
+  id: {
+    type: Number,
+    required: true,
+    validator: isNumber,
+  },
   price: {
     type: Number,
     required: true,
@@ -36,7 +44,7 @@ defineProps({
       <app-favorite-status
         :favorite="true"
         class="product__favorite"
-        @click="console.log('click')"
+        @click="userProductsStore.toggleProductInUserProducts('favorites', id)"
       />
     </div>
     <img class="product__img" :src="`/img/products/${img}`" aria-hidden="true" />
@@ -44,7 +52,7 @@ defineProps({
     <h3 class="product__title">{{ title }}, {{ weight }} г</h3>
     <div class="product__actions">
       <app-input-number v-model="count" :min="1" :max="100" />
-      <app-button label="Заказать" />
+      <app-button label="В корзину" />
     </div>
   </article>
 </template>

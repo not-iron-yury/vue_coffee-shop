@@ -26,7 +26,9 @@ export interface IUserData {
 
 export interface IUserProducts {
   id?: number
-  user_id: string
+  user_id: number
   favorites: number[]
   cart: number[]
 }
+
+export type listName = 'favorites' | 'cart'

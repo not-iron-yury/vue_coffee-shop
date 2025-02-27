@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { url } from '../API'
-import type { IUserProducts } from '../inretfaces'
-//import { useAuthStore } from './authStore'
+import type { IUserProducts, listName } from '../inretfaces'
+import { useAuthStore } from './authStore'
 
 export const useUserProductsStore = defineStore('userProducts', () => {
-  //const authStore = useAuthStore()
+  const authStore = useAuthStore()
   const userProducts = ref<IUserProducts | null>(null)
 
   // создаем на бэке объект для хранения данных о корзине и избранном
@@ -26,6 +26,16 @@ export const useUserProductsStore = defineStore('userProducts', () => {
 
       if (!res.ok)
         throw new Error('Ошибка при попытке создать данные о товарах нового пользователя.')
+
+      // добавляем в стейт аналогичный объект с пустыми списками (после регистрации иного варианта не может и быть)
+      if (authStore.user) {
+        userProducts.value = {
+          id: authStore.user.id, // тут скользкий момент, т.к. id присваивается автоматом на бэке. есть возможность получить разые значения, и тогда будет пездец.
+          user_id: authStore.user.id,
+          favorites: [],
+          cart: [],
+        }
+      }
     } catch (error) {
       console.error(error)
     }
@@ -48,7 +58,44 @@ export const useUserProductsStore = defineStore('userProducts', () => {
     }
   }
 
-  return { userProducts, createUserProductsData, getUserProductsData }
+  // меняем данные в стейте userProducts
+  const changeUserProductsState = (listName: listName, productId: number): void => {
+    if (userProducts.value![listName].includes(productId)) {
+      const index = userProducts.value![listName].indexOf(productId)
+      userProducts.value![listName].splice(index, 1) // удаляем, если товар уже есть в списке
+    } else {
+      userProducts.value![listName].push(productId) // добавляем, если товара нет в списке
+    }
+  }
+
+  // обновляем данные о товарах пользователя
+  const setUserProductsData = async (listName: listName, productId: number): Promise<void> => {
+    try {
+      if (authStore.user && userProducts.value) {
+        changeUserProductsState(listName, productId) // меняем данные в стейте userProducts
+
+        const res = await fetch(`${url}/userproducts/${authStore.user.id}`, {
+          method: 'PATCH',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            [listName]: userProducts.value![listName],
+          }),
+        })
+
+        if (!res.ok) throw new Error('В процессе регистрации возникла ошибка.')
+
+        const response = await res.json()
+        console.log(response)
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  return { userProducts, createUserProductsData, getUserProductsData, setUserProductsData }
 })
 
 /*
@@ -59,7 +106,7 @@ export const useUserProductsStore = defineStore('userProducts', () => {
         "list": []
     },
 
-2. при авторизации запрошивать эти данные с бэке, + проверять в localStorage и синхронизировать
+2. при авторизации запрошивать эти данные с бэка
 3. добавление или удаление через PATCH (мы знаем id самого объекта, см. пункты 1 и 2)
 
 // PATCH https://d774fe2b8f07493b.mokky.dev/favorites/1
@@ -85,6 +132,5 @@ const index = state.array.indexOf(valueToRemove); // Поиск индекса �
 if (index !== -1) {
   state.array.splice(index, 1);   // Удаление элемента по найденному индексу
 }
-
 
 */

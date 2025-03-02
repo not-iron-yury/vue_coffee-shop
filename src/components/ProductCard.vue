@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import AppInputNumber from './AppInputNumber.vue'
-import AppButton from './AppButton.vue'
-import AppFavoriteStatus from './AppFavoriteStatus.vue'
+import AppInputNumber from './UI/AppInputNumber.vue'
+import AppButton from './UI/AppButton.vue'
+import AppFavoriteStatus from './UI/AppFavoriteStatus.vue'
 import { isValidPrice, isValidLabel, isValidWeight, isNumber } from '../validators'
 import { useUserProductsStore } from '@/stores/userProductsStore'
 

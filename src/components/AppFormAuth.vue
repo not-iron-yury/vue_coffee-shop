@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-import AppButton from './AppButton.vue'
+import AppButton from './UI/AppButton.vue'
 import { removeOverflowHidden } from '../functions'
 import { useAuthStore } from '../stores/authStore'
 import type { IFormData } from '../inretfaces'

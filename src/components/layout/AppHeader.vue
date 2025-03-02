@@ -6,7 +6,7 @@ import { computed, ref } from 'vue'
 import { getScrollbarWidth, addOverflowHidden } from '@/functions'
 import { useAuthStore } from '@/stores/authStore'
 import { useUserProductsStore } from '@/stores/userProductsStore'
-import AppBadge from '@/components/AppBadge.vue'
+import AppBadge from '@/components/UI/AppBadge.vue'
 
 const authStore = useAuthStore()
 const productsStore = useUserProductsStore()

@@ -3,10 +3,13 @@ import { RouterLink } from 'vue-router'
 import AppPopUp from '../AppPopUp.vue'
 import AppFormAuth from '../AppFormAuth.vue'
 import { computed, ref } from 'vue'
-import { getScrollbarWidth, addOverflowHidden } from '../../functions'
+import { getScrollbarWidth, addOverflowHidden } from '@/functions'
 import { useAuthStore } from '@/stores/authStore'
+import { useUserProductsStore } from '@/stores/userProductsStore'
+import AppBadge from '@/components/AppBadge.vue'
 
 const authStore = useAuthStore()
+const productsStore = useUserProductsStore()
 
 const showOverlay = ref(false)
 
@@ -40,6 +43,16 @@ const authhandler = (): void => {
         <button class="nav-btn" @click="authhandler">
           <img :src="authImg" aria-label="Авторизоваться" title="Авторизоваться" class="nav-img" />
         </button>
+        <RouterLink to="/favorites" class="nav-link">
+          <app-badge :count="productsStore.userProducts.favorites.length">
+            <img
+              src="/favorites.svg"
+              aria-label="Избранные товары"
+              title="Избранные товары"
+              class="nav-img"
+            />
+          </app-badge>
+        </RouterLink>
         <RouterLink to="/cart" class="nav-link">
           <img src="/cart.svg" aria-label="Корзина" title="Корзина" class="nav-img" />
         </RouterLink>

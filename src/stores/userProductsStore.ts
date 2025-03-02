@@ -66,8 +66,8 @@ export const useUserProductsStore = defineStore('userProducts', () => {
       userProducts.user_id = data.user_id
 
       if (userProducts.favorites.length) {
-        // если пользователь натыкал что-то до авторизации, то пушим данные с бэка в локальный список и отправляем все на бэк
-        userProducts.favorites.push(...data.favorites)
+        // если пользователь натыкал что-то до авторизации, то объединяем данные бэка с локальными, и отправляем обновленный список на бэк
+        userProducts.favorites = [...new Set(userProducts.favorites.concat(data.favorites))]
         setUserProductsData(LIST_FAVORITES, userProducts.favorites)
       } else {
         // если локальный список пустой, то просто подменяем его

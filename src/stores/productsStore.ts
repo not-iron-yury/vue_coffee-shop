@@ -11,13 +11,11 @@ export const useProductsStore = defineStore('products', () => {
   })
 
   const getProducts = async (): Promise<void> => {
-    if (!items.value.length) {
-      const res = await fetch(url + '/items')
-      if (!res.ok) {
-        throw new Error('При попытке получить список товаров возникла ошибка.')
-      }
-      items.value = await res.json()
+    const res = await fetch(url + '/items')
+    if (!res.ok) {
+      throw new Error('При попытке получить список товаров возникла ошибка.')
     }
+    items.value = await res.json()
   }
 
   return { items, itemsBest, getProducts }

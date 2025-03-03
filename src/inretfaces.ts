@@ -5,6 +5,7 @@ export interface IProduct {
   img: string
   weight: number
   topSelling: boolean
+  inFavorites?: boolean
 }
 
 export interface IFormData {
@@ -31,4 +32,6 @@ export interface IUserProducts {
   cart: number[]
 }
 
-export type listName = 'favorites' | 'cart'
+export type TlistName = 'favorites' | 'cart'
+
+export type TnameIndexCollection = 'all' | 'best'

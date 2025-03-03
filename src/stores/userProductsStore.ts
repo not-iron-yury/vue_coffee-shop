@@ -1,12 +1,14 @@
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
-import { url } from '../API'
-import type { IUserProducts, listName } from '../inretfaces'
+import { url } from '@/API'
+import type { IUserProducts, TlistName } from '@/inretfaces'
 import { useAuthStore } from './authStore'
+import { useProductsStore } from '@/stores/productsStore'
 import { LIST_CART, LIST_FAVORITES } from '@/constans'
 
 export const useUserProductsStore = defineStore('userProducts', () => {
   const authStore = useAuthStore()
+  const productsStore = useProductsStore()
   const userProducts = reactive<IUserProducts>({
     id: 0,
     user_id: 0,
@@ -14,12 +16,23 @@ export const useUserProductsStore = defineStore('userProducts', () => {
     cart: [],
   })
 
-  const toggleProductInUserProducts = (listName: listName, productId: number): void => {
+  const toggleFavoriteStatusProduct = (productId: number, value: boolean): void => {
+    const index = productsStore.productIndexMap.get(productId) // получаем индекс из кеша
+    if (typeof index === 'number') {
+      productsStore.items[index].inFavorites = value // меняем статус товара
+    } else {
+      console.error(`Товар с ID ${productId} не найден.`)
+    }
+  }
+
+  const toggleProductInUserProducts = (listName: TlistName, productId: number): void => {
     if (userProducts![listName].includes(productId)) {
       const index = userProducts![listName].indexOf(productId)
       userProducts![listName].splice(index, 1) // удаляем, если товар уже есть в списке
+      toggleFavoriteStatusProduct(productId, false)
     } else {
       userProducts![listName].push(productId) // добавляем, если товара нет в списке
+      toggleFavoriteStatusProduct(productId, true)
     }
 
     setUserProductsData(listName, userProducts![listName])
@@ -58,8 +71,7 @@ export const useUserProductsStore = defineStore('userProducts', () => {
       }
 
       const response = await res.json()
-      const data = response[0] as IUserProducts
-
+      const data: IUserProducts = response[0]
       // --------------------------------------------- //
       // синхронизация локальных данных с бэком
       userProducts.id = data.id
@@ -74,6 +86,7 @@ export const useUserProductsStore = defineStore('userProducts', () => {
         userProducts.favorites = data.favorites
       }
 
+      // переделать!!!!!!!!!!!!!!!!!!!1
       if (userProducts.cart.length) {
         userProducts.cart.push(...data.cart)
         setUserProductsData(LIST_CART, userProducts.cart)
@@ -87,7 +100,7 @@ export const useUserProductsStore = defineStore('userProducts', () => {
   }
 
   // обновляем данные о товарах пользователя на бэке
-  const setUserProductsData = async (listName: listName, newList: number[]): Promise<void> => {
+  const setUserProductsData = async (listName: TlistName, newList: number[]): Promise<void> => {
     try {
       if (authStore.user) {
         const res = await fetch(`${url}/userproducts/${authStore.user.id}`, {

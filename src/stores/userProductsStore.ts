@@ -4,7 +4,7 @@ import { url } from '@/API'
 import type { IUserProducts, TlistName } from '@/inretfaces'
 import { useAuthStore } from './authStore'
 import { useProductsStore } from '@/stores/productsStore'
-import { LIST_CART, LIST_FAVORITES } from '@/constans'
+import { LIST_CART, LIST_FAVORITES } from '@/constants'
 
 export const useUserProductsStore = defineStore('userProducts', () => {
   const authStore = useAuthStore()

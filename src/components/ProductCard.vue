@@ -3,37 +3,20 @@ import { ref } from 'vue'
 import AppInputNumber from './UI/AppInputNumber.vue'
 import AppButton from './UI/AppButton.vue'
 import AppFavoriteStatus from './UI/AppFavoriteStatus.vue'
-import { isValidPrice, isValidLabel, isValidWeight, isNumber } from '../validators'
 import { useUserProductsStore } from '@/stores/userProductsStore'
+import type { IProduct } from '@/inretfaces'
+import type { PropType } from 'vue'
+import { LIST_FAVORITES } from '@/constants'
 
 const userProductsStore = useUserProductsStore()
 const count = ref<number>(0)
 
 defineProps({
-  id: {
-    type: Number,
+  data: {
+    type: Object as PropType<IProduct>,
     required: true,
-    validator: isNumber,
-  },
-  price: {
-    type: Number,
-    required: true,
-    validator: isValidPrice,
-  },
-  title: {
-    type: String,
-    required: true,
-    validator: isValidLabel,
-  },
-  weight: {
-    type: Number,
-    required: false,
-    validator: isValidWeight,
-  },
-  img: {
-    type: String,
-    required: true,
-    validator: isValidLabel,
+    description: 'Объект, описывающий товар.',
+    // validator: просто не хочу его делать
   },
 })
 </script>
@@ -42,14 +25,14 @@ defineProps({
   <article class="product">
     <div class="product__favorite-wrapper">
       <app-favorite-status
-        :favorite="true"
+        :favorite="data.inFavorites"
         class="product__favorite"
-        @click="userProductsStore.toggleProductInUserProducts('favorites', id)"
+        @click="userProductsStore.toggleProductInUserProducts(LIST_FAVORITES, data.id)"
       />
     </div>
-    <img class="product__img" :src="`/img/products/${img}`" aria-hidden="true" />
-    <p class="product__price">{{ price }} руб.</p>
-    <h3 class="product__title">{{ title }}, {{ weight }} г</h3>
+    <img class="product__img" :src="`/img/products/${data.img}`" aria-hidden="true" />
+    <p class="product__price">{{ data.price }} руб.</p>
+    <h3 class="product__title">{{ data.title }}, {{ data.weight }} г</h3>
     <div class="product__actions">
       <app-input-number v-model="count" :min="1" :max="100" />
       <app-button label="В корзину" />

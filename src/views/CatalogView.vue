@@ -6,12 +6,8 @@ import { useProductsStore } from '@/stores/productsStore'
 const productsStore = useProductsStore()
 
 onMounted(async () => {
-  if (!productsStore.items.length) {
-    try {
-      await productsStore.getProducts()
-    } catch (err) {
-      console.error(err)
-    }
+  if (productsStore.items.length === 0) {
+    await productsStore.getProducts()
   }
 })
 </script>
@@ -21,13 +17,7 @@ onMounted(async () => {
   <section class="products">
     <ul class="products__list">
       <li v-for="(item, i) in productsStore.items" :key="i" class="products__item">
-        <ProductCard
-          :id="item.id"
-          :price="item.price"
-          :title="item.title"
-          :weight="item.weight"
-          :img="item.img"
-        />
+        <ProductCard :data="item" />
       </li>
     </ul>
   </section>

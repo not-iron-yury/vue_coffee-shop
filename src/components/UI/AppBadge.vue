@@ -36,5 +36,6 @@ defineProps({
   color: white;
   background-color: var(--color-prime);
   border-radius: 100%;
+  outline: 1px solid black;
 }
 </style>

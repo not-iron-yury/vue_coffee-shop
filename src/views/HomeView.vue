@@ -7,11 +7,7 @@ const productsStore = useProductsStore()
 
 onMounted(async () => {
   if (!productsStore.items.length) {
-    try {
-      await productsStore.getProducts()
-    } catch (err) {
-      console.error(err)
-    }
+    await productsStore.getProducts()
   }
 })
 </script>
@@ -24,13 +20,7 @@ onMounted(async () => {
     <p class="products__descr">Кофе поможет рассказать вашей аудитории о вашем бизнесе.</p>
     <ul class="products__list">
       <li v-for="(item, i) in productsStore.itemsBest" :key="i" class="products__item">
-        <ProductCard
-          :id="item.id"
-          :price="item.price"
-          :title="item.title"
-          :weight="item.weight"
-          :img="item.img"
-        />
+        <ProductCard :data="item" />
       </li>
     </ul>
   </section>

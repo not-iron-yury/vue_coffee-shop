@@ -17,13 +17,21 @@ onMounted(async () => {
 })
 
 const getFavorites = (): IProduct[] => {
-  const favoritesId: number[] = userProductsStore.userProducts.favorites // список id избранных товаров
-  const productIndexMap: Map<number, number> = productsStore.productIndexMap // коллекция для получения индексов товаров
+  const productIndexMap: Map<number, number> = productsStore.productIndexMap // коллекция индексов товаров
 
-  return favoritesId.map((productId: number) => {
-    const productIndex: number = productIndexMap.get(productId) as number // получение индекса товара в коллекции items
-    return productsStore.items[productIndex] // искомый избранный товар
-  })
+  return userProductsStore.userProducts.favorites
+    .map((id) => {
+      const productIndex = productIndexMap.get(id) // получаем индекс товара по его id
+      if (productIndex !== undefined) {
+        // если индекс товара найден, возвращаем соответствующий товар
+        return productsStore.items[productIndex]
+      } else {
+        // если индекс не найден, логируем ошибку и возвращаем null
+        console.error(`Товар с ID ${id} не найден.`, { id, productIndexMap })
+        return null
+      }
+    })
+    .filter((product): product is IProduct => product !== null)
 }
 </script>
 

@@ -54,7 +54,9 @@ const authhandler = (): void => {
           </app-badge>
         </RouterLink>
         <RouterLink to="/cart" class="nav-link">
-          <img src="/cart.svg" aria-label="Корзина" title="Корзина" class="nav-img" />
+          <app-badge :count="Object.keys(productsStore.userProducts.cart).length">
+            <img src="/cart.svg" aria-label="Корзина" title="Корзина" class="nav-img" />
+          </app-badge>
         </RouterLink>
       </nav>
     </div>

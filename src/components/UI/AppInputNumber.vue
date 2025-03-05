@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 
 const props = defineProps({
   modelValue: {
@@ -16,23 +16,29 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'zeroCount'])
 
 const value = ref<number>(1)
 
-function increment() {
+const increment = () => {
   if (value.value < props.max) {
     value.value++
     emit('update:modelValue', value.value)
   }
 }
 
-function decrement() {
+const decrement = () => {
   if (value.value > props.min) {
     value.value--
     emit('update:modelValue', value.value)
   }
 }
+
+watch(value, () => {
+  if (value.value === 0) {
+    emit('zeroCount')
+  }
+})
 </script>
 
 <template>

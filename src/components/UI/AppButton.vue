@@ -19,6 +19,7 @@ defineProps({
 <style scoped lang="scss">
 .btn {
   padding: 16px 35px;
+  width: 100%;
   max-height: 57px;
   color: var(--color-light);
   font-weight: 700;

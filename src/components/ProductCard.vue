@@ -8,7 +8,7 @@ import type { IProduct } from '@/inretfaces'
 import type { PropType } from 'vue'
 
 const userProductsStore = useUserProductsStore()
-const count = ref<number>(0)
+const count = ref<number>(1)
 
 defineProps({
   data: {
@@ -21,10 +21,10 @@ defineProps({
 </script>
 
 <template>
-  <article class="product">
-    <div class="product__favorite-wrapper">
+  <article class="product" v-cloak>
+    <div class="product__icon-wrapper">
       <app-favorite-status
-        :favorite="data.inFavorites"
+        :isFavorite="data.inFavorites"
         class="product__favorite"
         @click="userProductsStore.toggleFavoritesInUserProducts(data.id)"
       />
@@ -33,8 +33,18 @@ defineProps({
     <p class="product__price">{{ data.price }} руб.</p>
     <h3 class="product__title">{{ data.title }}, {{ data.weight }} г</h3>
     <div class="product__actions">
-      <app-input-number v-model="count" :min="1" :max="100" />
-      <app-button label="В корзину" />
+      <app-input-number
+        v-model="count"
+        :min="0"
+        :max="100"
+        v-if="data.inCart"
+        @zeroCount="userProductsStore.removeProductFromCart(data.id)"
+      />
+      <app-button
+        :label="data.inCart ? 'В корзине' : 'В корзину'"
+        :disabled="data.inCart"
+        @click="userProductsStore.addProductToCart(data.id)"
+      />
     </div>
   </article>
 </template>
@@ -44,7 +54,7 @@ defineProps({
   padding: 5px;
   max-width: 310px;
 
-  &__favorite-wrapper {
+  &__icon-wrapper {
     display: flex;
     justify-content: flex-end;
     width: 100%;
@@ -75,6 +85,7 @@ defineProps({
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 15px;
   }
 }
 </style>

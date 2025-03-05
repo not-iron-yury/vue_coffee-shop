@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 import { url } from '@/API'
-import type { IUserProducts, TlistName } from '@/inretfaces'
+import type { IUserProducts, TlistName, TProductStatusProp } from '@/inretfaces'
 import { useAuthStore } from './authStore'
 import { useProductsStore } from '@/stores/productsStore'
 import { LIST_FAVORITES } from '@/constants'
@@ -18,6 +18,26 @@ export const useUserProductsStore = defineStore('userProducts', () => {
 
   /* ------------------------------------------------------------------------------- */
 
+  // ДОБАВЛЕНИЕ товара в корзину
+  const addProductToCart = (productId: number) => {
+    if (!userProducts.cart.hasOwnProperty(productId)) {
+      userProducts.cart[productId] = 1 // добавляем id товара в коллекцию cart (с дефолтным значением 1)
+
+      toggleFavoriteStatusProduct(productId, true, 'inCart') // меняем статус inCart
+    }
+  }
+
+  // УДАЛЕНИЕ товара из корзины
+  const removeProductFromCart = (productId: number) => {
+    if (userProducts.cart.hasOwnProperty(productId)) {
+      delete userProducts.cart[productId] // удаляем id товара из коллекции cart
+
+      toggleFavoriteStatusProduct(productId, false, 'inCart') // меняем статус inCart
+    }
+  }
+
+  /* ------------------------------------------------------------------------------- */
+
   // ТОГЛЕР избранных товаров
   const toggleFavoritesInUserProducts = (productId: number): void => {
     if (userProducts.favorites.includes(productId)) {
@@ -31,23 +51,26 @@ export const useUserProductsStore = defineStore('userProducts', () => {
   // ДОБАВЛЕНИЕ товара в избранные
   const addProductToFavoriteList = (productId: number): void => {
     userProducts.favorites.push(productId) // добавляем, если товара нет в списке
-    toggleFavoriteStatusProduct(productId, true)
+    toggleFavoriteStatusProduct(productId, true, 'inFavorites')
   }
 
   // УДАЛЕНИЕ товара из избранных
   const removeProductFromFavoriteList = (productId: number): void => {
     const index = userProducts.favorites.indexOf(productId)
     userProducts.favorites.splice(index, 1)
-    toggleFavoriteStatusProduct(productId, false)
+    toggleFavoriteStatusProduct(productId, false, 'inFavorites')
   }
+  /* ------------------------------------------------------------------------------- */
 
   // ИЗМЕНЕНИЕ СТАТУСА товара (свойство inFavorites)
-  const toggleFavoriteStatusProduct = (productId: number, value: boolean): void => {
+  const toggleFavoriteStatusProduct = (
+    productId: number,
+    value: boolean,
+    statusProp: TProductStatusProp,
+  ): void => {
     const index = productsStore.productIndexMap.get(productId) // получаем индекс из кеша
     if (typeof index === 'number') {
-      productsStore.items[index].inFavorites = value // меняем статус товара
-    } else {
-      console.error(`Товар с ID ${productId} не найден.`)
+      productsStore.items[index][statusProp] = value // меняем статус товара
     }
   }
 
@@ -77,6 +100,8 @@ export const useUserProductsStore = defineStore('userProducts', () => {
     }
   }
 
+  /* ------------------------------------------------------------------------------- */
+
   // ПОЛУЧЕНИЕ ДАННЫХ О ТОВАРАХ пользователя с бэка при авторизации
   const getUserProductsData = async (userId: number): Promise<void> => {
     try {
@@ -88,11 +113,13 @@ export const useUserProductsStore = defineStore('userProducts', () => {
       const response = await res.json()
       const data: IUserProducts = response[0]
 
-      synchUserProductLists(data)
+      synchUserProductLists(data) //  синхронизируем локальные и полученные данные
     } catch (err) {
       console.error(err)
     }
   }
+
+  /* ------------------------------------------------------------------------------- */
 
   // СИНХРОНИЗАЦИЯ локальных данных с бэком при авторизации
   const synchUserProductLists = (data: IUserProducts) => {
@@ -113,6 +140,8 @@ export const useUserProductsStore = defineStore('userProducts', () => {
       setUserProductsData(LIST_FAVORITES, userProducts.favorites) // обновляем список favorites на бэке
     }
   }
+
+  /* ------------------------------------------------------------------------------- */
 
   // ОБНОВЛЕНИЕ ДАННЫХ о товарах пользователя на бэке
   const setUserProductsData = async (listName: TlistName, newList: number[]): Promise<void> => {
@@ -136,11 +165,15 @@ export const useUserProductsStore = defineStore('userProducts', () => {
     }
   }
 
+  /* ------------------------------------------------------------------------------- */
+
   return {
     userProducts,
     toggleFavoritesInUserProducts,
     createUserProductsData,
     getUserProductsData,
     setUserProductsData,
+    addProductToCart,
+    removeProductFromCart,
   }
 })

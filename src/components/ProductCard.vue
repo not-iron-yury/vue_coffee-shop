@@ -6,7 +6,6 @@ import AppFavoriteStatus from './UI/AppFavoriteStatus.vue'
 import { useUserProductsStore } from '@/stores/userProductsStore'
 import type { IProduct } from '@/inretfaces'
 import type { PropType } from 'vue'
-import { LIST_FAVORITES } from '@/constants'
 
 const userProductsStore = useUserProductsStore()
 const count = ref<number>(0)
@@ -27,7 +26,7 @@ defineProps({
       <app-favorite-status
         :favorite="data.inFavorites"
         class="product__favorite"
-        @click="userProductsStore.toggleProductInUserProducts(LIST_FAVORITES, data.id)"
+        @click="userProductsStore.toggleFavoritesInUserProducts(data.id)"
       />
     </div>
     <img class="product__img" :src="`/img/products/${data.img}`" aria-hidden="true" />

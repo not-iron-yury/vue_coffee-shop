@@ -36,6 +36,13 @@ export const useUserProductsStore = defineStore('userProducts', () => {
     }
   }
 
+  //ИЗМЕНЕНИЕ КОЛИЧЕСТВА товарной позиции
+  const changeProductQuantityInCart = (productId: number, quantity: number) => {
+    if (userProducts.cart.hasOwnProperty(productId)) {
+      userProducts.cart[productId] = quantity
+    }
+  }
+
   /* ------------------------------------------------------------------------------- */
 
   // ТОГЛЕР избранных товаров
@@ -175,5 +182,6 @@ export const useUserProductsStore = defineStore('userProducts', () => {
     setUserProductsData,
     addProductToCart,
     removeProductFromCart,
+    changeProductQuantityInCart,
   }
 })

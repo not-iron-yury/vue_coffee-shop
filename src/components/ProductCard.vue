@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import AppInputNumber from './UI/AppInputNumber.vue'
 import AppButton from './UI/AppButton.vue'
 import AppFavoriteStatus from './UI/AppFavoriteStatus.vue'
@@ -10,13 +10,17 @@ import type { PropType } from 'vue'
 const userProductsStore = useUserProductsStore()
 const count = ref<number>(1)
 
-defineProps({
+const prop = defineProps({
   data: {
     type: Object as PropType<IProduct>,
     required: true,
     description: 'Объект, описывающий товар.',
     // validator: просто не хочу его делать
   },
+})
+
+watch(count, () => {
+  userProductsStore.changeProductQuantityInCart(prop.data.id, count.value)
 })
 </script>
 

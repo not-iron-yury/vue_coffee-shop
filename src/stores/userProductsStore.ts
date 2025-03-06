@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 import { url } from '@/API'
-import type { IUserProducts, TlistName, TProductStatusProp } from '@/inretfaces'
+import type { IUserProducts, TlistName, TProductStatusProp, TCart } from '@/inretfaces'
 import { useAuthStore } from './authStore'
 import { useProductsStore } from '@/stores/productsStore'
-import { LIST_FAVORITES } from '@/constants'
+import { LIST_FAVORITES, LIST_CART } from '@/constants'
 
 export const useUserProductsStore = defineStore('userProducts', () => {
   const authStore = useAuthStore()
@@ -19,11 +19,21 @@ export const useUserProductsStore = defineStore('userProducts', () => {
   /* ------------------------------------------------------------------------------- */
 
   // ДОБАВЛЕНИЕ товара в корзину
-  const addProductToCart = (productId: number) => {
+  const addProductToCart = (productId: number, quantity: number = 1) => {
     if (!userProducts.cart.hasOwnProperty(productId)) {
-      userProducts.cart[productId] = 1 // добавляем id товара в коллекцию cart (с дефолтным значением 1)
+      userProducts.cart[productId] = quantity // добавляем товар в cart
 
-      toggleFavoriteStatusProduct(productId, true, 'inCart') // меняем статус inCart
+      // --------------------- //
+
+      const index = productsStore.productIndexMap.get(productId) // получаем индекс из кеша
+      if (typeof index === 'number') {
+        productsStore.items[index]['count'] = quantity // меняем статус товара
+      }
+
+      // --------------------- //
+
+      toggleStatusProduct(productId, true, 'inCart') // меняем статус inCart
+      setUserProductsData(LIST_CART, userProducts.cart) // отправляем данные на сервер
     }
   }
 
@@ -32,7 +42,8 @@ export const useUserProductsStore = defineStore('userProducts', () => {
     if (userProducts.cart.hasOwnProperty(productId)) {
       delete userProducts.cart[productId] // удаляем id товара из коллекции cart
 
-      toggleFavoriteStatusProduct(productId, false, 'inCart') // меняем статус inCart
+      toggleStatusProduct(productId, false, 'inCart') // меняем статус inCart
+      setUserProductsData(LIST_CART, userProducts.cart) // отправляем данные на сервер
     }
   }
 
@@ -41,6 +52,7 @@ export const useUserProductsStore = defineStore('userProducts', () => {
     if (userProducts.cart.hasOwnProperty(productId)) {
       userProducts.cart[productId] = quantity
     }
+    setUserProductsData(LIST_CART, userProducts.cart) // отправляем данные на сервер
   }
 
   /* ------------------------------------------------------------------------------- */
@@ -58,19 +70,19 @@ export const useUserProductsStore = defineStore('userProducts', () => {
   // ДОБАВЛЕНИЕ товара в избранные
   const addProductToFavoriteList = (productId: number): void => {
     userProducts.favorites.push(productId) // добавляем, если товара нет в списке
-    toggleFavoriteStatusProduct(productId, true, 'inFavorites')
+    toggleStatusProduct(productId, true, 'inFavorites')
   }
 
   // УДАЛЕНИЕ товара из избранных
   const removeProductFromFavoriteList = (productId: number): void => {
     const index = userProducts.favorites.indexOf(productId)
     userProducts.favorites.splice(index, 1)
-    toggleFavoriteStatusProduct(productId, false, 'inFavorites')
+    toggleStatusProduct(productId, false, 'inFavorites')
   }
   /* ------------------------------------------------------------------------------- */
 
   // ИЗМЕНЕНИЕ СТАТУСА товара (свойство inFavorites)
-  const toggleFavoriteStatusProduct = (
+  const toggleStatusProduct = (
     productId: number,
     value: boolean,
     statusProp: TProductStatusProp,
@@ -128,30 +140,56 @@ export const useUserProductsStore = defineStore('userProducts', () => {
 
   /* ------------------------------------------------------------------------------- */
 
-  // СИНХРОНИЗАЦИЯ локальных данных с бэком при авторизации
+  // СИНХРОНИЗАЦИЯ локальных данных о товарах пользователя, с бэком при авторизации
   const synchUserProductLists = (data: IUserProducts) => {
     userProducts.id = data.id
     userProducts.user_id = data.user_id
 
-    // если локальный список favorites пустой, то просто меняем его на полученный с бэка
-    if (!userProducts.favorites.length) {
-      userProducts.favorites = data.favorites
-    } else {
-      // если пользователь натыкал что-то до авторизации, то объединяем данные бэка с локальными, и обновляем список на бэке
-      data.favorites.forEach((id) => {
+    synchUserFavorites(data.favorites)
+    synchUserCart(data.cart)
+  }
+
+  // СИНХРОНИЗАЦИЯ favorites
+  const synchUserFavorites = (favorites: number[]) => {
+    // наличие локальных данных favorites до авторизации
+    const isLocalData = favorites.length !== 0 ? true : false
+
+    // объединяем локальные и внешние данные
+    if (favorites.length !== 0) {
+      favorites.forEach((id) => {
         if (!userProducts.favorites.includes(id)) {
           addProductToFavoriteList(id)
         }
       })
+    }
+    // обновляем список cart на бэке, если были натыканы товары до авторизации
+    if (isLocalData) {
+      setUserProductsData(LIST_FAVORITES, userProducts.favorites)
+    }
+  }
 
-      setUserProductsData(LIST_FAVORITES, userProducts.favorites) // обновляем список favorites на бэке
+  // СИНХРОНИЗАЦИЯ cart
+  const synchUserCart = (cart: TCart) => {
+    // наличие локальных данных cart до авторизации
+    const isLocalData = Object.keys(userProducts.cart).length === 0 ? true : false
+
+    // объединяем локальные и внешние данные
+    const dataCartKeys: string[] = Object.keys(cart)
+    if (dataCartKeys.length !== 0) {
+      dataCartKeys.forEach((id: string) => {
+        addProductToCart(+id, cart[id])
+      })
+    }
+    // обновляем список cart на бэке, если были натыканы товары до авторизации
+    if (!isLocalData) {
+      setUserProductsData(LIST_CART, userProducts.cart)
     }
   }
 
   /* ------------------------------------------------------------------------------- */
 
   // ОБНОВЛЕНИЕ ДАННЫХ о товарах пользователя на бэке
-  const setUserProductsData = async (listName: TlistName, newList: number[]): Promise<void> => {
+  const setUserProductsData = async (listName: TlistName, newList: number[] | TCart) => {
     try {
       if (authStore.user) {
         const res = await fetch(`${url}/userproducts/${authStore.user.id}`, {

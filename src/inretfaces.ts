@@ -7,6 +7,7 @@ export interface IProduct {
   topSelling: boolean
   inFavorites?: boolean
   inCart?: boolean
+  count?: number
 }
 
 export interface IFormData {
@@ -33,7 +34,7 @@ export interface IUserProducts {
   cart: TCart
 }
 
-type TCart = { [key: number]: number }
+export type TCart = { [key: string]: number }
 
 export type TlistName = 'favorites' | 'cart'
 export type TProductStatusProp = 'inFavorites' | 'inCart'

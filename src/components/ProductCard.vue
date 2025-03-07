@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed } from 'vue'
 import AppInputNumber from './UI/AppInputNumber.vue'
 import AppButton from './UI/AppButton.vue'
 import AppFavoriteStatus from './UI/AppFavoriteStatus.vue'
@@ -8,19 +8,24 @@ import type { IProduct } from '@/inretfaces'
 import type { PropType } from 'vue'
 
 const userProductsStore = useUserProductsStore()
-const count = ref<number>(1)
 
-const prop = defineProps({
+const props = defineProps({
   data: {
     type: Object as PropType<IProduct>,
     required: true,
     description: 'Объект, описывающий товар.',
-    // validator: просто не хочу его делать
   },
 })
 
-watch(count, () => {
-  userProductsStore.changeProductQuantityInCart(prop.data.id, count.value)
+const count = computed({
+  get: () => userProductsStore.getProductCountInCart(props.data.id),
+  set: (value) => {
+    if (value > 0) {
+      userProductsStore.changeProductQuantityInCart(props.data.id, value)
+    } else {
+      userProductsStore.removeProductFromCart(props.data.id)
+    }
+  },
 })
 </script>
 
@@ -37,13 +42,7 @@ watch(count, () => {
     <p class="product__price">{{ data.price }} руб.</p>
     <h3 class="product__title">{{ data.title }}, {{ data.weight }} г</h3>
     <div class="product__actions">
-      <app-input-number
-        v-model="count"
-        :min="0"
-        :max="100"
-        v-if="data.inCart"
-        @zeroCount="userProductsStore.removeProductFromCart(data.id)"
-      />
+      <app-input-number v-model="count" :min="0" :max="100" v-if="data.inCart" />
       <app-button
         :label="data.inCart ? 'В корзине' : 'В корзину'"
         :disabled="data.inCart"

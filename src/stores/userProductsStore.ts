@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { reactive } from 'vue'
+import { reactive, computed } from 'vue'
 import { url } from '@/API'
 import type { IUserProducts, TlistName, TProductStatusProp, TCart } from '@/inretfaces'
 import { useAuthStore } from './authStore'
@@ -55,6 +55,8 @@ export const useUserProductsStore = defineStore('userProducts', () => {
     setUserProductsData(LIST_CART, userProducts.cart) // отправляем данные на сервер
   }
 
+  // ГЕТТЕР количества товара в корзине
+  const getProductCountInCart = computed(() => (id: number) => userProducts.cart[id] || 1)
   /* ------------------------------------------------------------------------------- */
 
   // ТОГЛЕР избранных товаров
@@ -151,8 +153,7 @@ export const useUserProductsStore = defineStore('userProducts', () => {
 
   // СИНХРОНИЗАЦИЯ favorites
   const synchUserFavorites = (favorites: number[]) => {
-    // наличие локальных данных favorites до авторизации
-    const isLocalData = favorites.length !== 0 ? true : false
+    const isLocalData = favorites.length !== 0 ? true : false // наличие локальных данных favorites до авторизации
 
     // объединяем локальные и внешние данные
     if (favorites.length !== 0) {
@@ -170,18 +171,17 @@ export const useUserProductsStore = defineStore('userProducts', () => {
 
   // СИНХРОНИЗАЦИЯ cart
   const synchUserCart = (cart: TCart) => {
-    // наличие локальных данных cart до авторизации
-    const isLocalData = Object.keys(userProducts.cart).length === 0 ? true : false
+    const isLocalData = Object.keys(userProducts.cart).length !== 0 ? true : false // наличие локальных данных cart до авторизации
 
     // объединяем локальные и внешние данные
-    const dataCartKeys: string[] = Object.keys(cart)
-    if (dataCartKeys.length !== 0) {
-      dataCartKeys.forEach((id: string) => {
+    const cartKeys: string[] = Object.keys(cart)
+    if (cartKeys.length !== 0) {
+      cartKeys.forEach((id: string) => {
         addProductToCart(+id, cart[id])
       })
     }
     // обновляем список cart на бэке, если были натыканы товары до авторизации
-    if (!isLocalData) {
+    if (isLocalData) {
       setUserProductsData(LIST_CART, userProducts.cart)
     }
   }
@@ -221,5 +221,6 @@ export const useUserProductsStore = defineStore('userProducts', () => {
     addProductToCart,
     removeProductFromCart,
     changeProductQuantityInCart,
+    getProductCountInCart,
   }
 })

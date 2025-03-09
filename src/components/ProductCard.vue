@@ -18,7 +18,7 @@ const props = defineProps({
 })
 
 const count = computed({
-  get: () => userProductsStore.getProductCountInCart(props.data.id),
+  get: () => userProductsStore.getProductCountInCart(props.data.id), // связывает карточку со своим значением в userProductsStore
   set: (value) => {
     if (value > 0) {
       userProductsStore.changeProductQuantityInCart(props.data.id, value)

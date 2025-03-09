@@ -55,7 +55,7 @@ export const useUserProductsStore = defineStore('userProducts', () => {
     setUserProductsData(LIST_CART, userProducts.cart) // отправляем данные на сервер
   }
 
-  // ГЕТТЕР количества товара в корзине
+  // ГЕТТЕР количества товара в корзине, для связи карточек товаров с userProducts
   const getProductCountInCart = computed(() => (id: number) => userProducts.cart[id] || 1)
   /* ------------------------------------------------------------------------------- */
 

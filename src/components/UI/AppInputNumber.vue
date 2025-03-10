@@ -34,11 +34,11 @@ const decrement = () => {
     <div class="quantity__control quantity__control_theme_second-primary">
       <button
         type="button"
-        class="quantity__button quantity__btn-decrease"
+        class="quantity__btn quantity__btn-decrease"
         @click="decrement"
         :disabled="modelValue <= min"
       >
-        -
+        &minus;
       </button>
       <input
         type="number"
@@ -51,11 +51,11 @@ const decrement = () => {
       />
       <button
         type="button"
-        class="quantity__button quantity__btn-increase"
+        class="quantity__btn quantity__btn-increase"
         @click="increment"
         :disabled="modelValue >= max"
       >
-        +
+        &plus;
       </button>
     </div>
   </div>
@@ -104,11 +104,25 @@ input[type='number']::-webkit-inner-spin-button {
     }
   }
 
-  &__button {
-    padding: 10px 12px;
+  &__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    padding: 10px 12px 12px;
     color: var(--color-text);
     cursor: pointer;
-    font-size: 20px;
+    font-size: 25px;
+    border-radius: 5px;
+
+    &:not(:disabled) {
+      color: #fa2004;
+      background-color: rgba(255, 81, 0, 0.078);
+    }
+
+    &:disabled {
+      background-color: rgba(104, 13, 1, 0.039);
+    }
   }
 }
 </style>

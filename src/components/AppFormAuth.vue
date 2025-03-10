@@ -70,11 +70,9 @@ const submitForm = () => {
       </label>
     </fieldset>
 
-    <app-button
-      :label="isAuth ? 'Войти' : 'Зарегистрироваться'"
-      class="form__bnt-submit"
-      @click="submitForm"
-    />
+    <app-button class="form__bnt-submit" @click="submitForm">
+      {{ isAuth ? 'Войти' : 'Зарегистрироваться' }}
+    </app-button>
 
     <p class="form__status">
       {{ isAuth ? 'Еще не зарегистрировались?' : 'Уже зарегистрированы?' }}

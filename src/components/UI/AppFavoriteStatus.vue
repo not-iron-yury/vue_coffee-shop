@@ -8,7 +8,7 @@ defineProps({
 </script>
 
 <template>
-  <button>
+  <button :aria-label="isFavorite ? 'Удалить из избранного' : 'Добавить в избранное'">
     <svg
       v-show="!isFavorite"
       xmlns="http://www.w3.org/2000/svg"

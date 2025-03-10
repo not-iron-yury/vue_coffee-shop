@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import AppInputNumber from './UI/AppInputNumber.vue'
-import AppButton from './UI/AppButton.vue'
 import AppFavoriteStatus from './UI/AppFavoriteStatus.vue'
+import AppRemoveButton from './UI/AppRemoveButton.vue'
 import { useUserProductsStore } from '@/stores/userProductsStore'
 import type { IProduct } from '@/inretfaces'
 import type { PropType } from 'vue'
@@ -13,7 +13,6 @@ const props = defineProps({
   data: {
     type: Object as PropType<IProduct>,
     required: true,
-    description: 'Объект, описывающий товар.',
   },
 })
 
@@ -31,72 +30,68 @@ const count = computed({
 
 <template>
   <article class="product" v-cloak>
-    <div class="product__icon-wrapper">
+    <div class="product__btn-wrapper">
       <app-favorite-status
         :isFavorite="data.inFavorites"
-        class="product__favorite"
+        class="product__btn"
         @click="userProductsStore.toggleFavoritesInUserProducts(data.id)"
+      />
+      <app-remove-button
+        class="product__btn"
+        @click="userProductsStore.removeProductFromCart(data.id)"
       />
     </div>
     <img class="product__img" :src="`/img/products/${data.img}`" aria-hidden="true" />
-    <p class="product__price">{{ data.price }} руб.</p>
     <h3 class="product__title">{{ data.title }}, {{ data.weight }} г</h3>
+    <p class="product__price">{{ data.price }} руб.</p>
     <div class="product__actions">
-      <app-input-number
-        v-model="count"
-        :min="0"
-        :max="100"
-        v-if="data.inCart"
-        class="product__input"
-      />
-      <app-button :disabled="data.inCart" @click="userProductsStore.addProductToCart(data.id)">
-        <template v-if="data.inCart"><img src="/cart.svg" /></template>
-        <template v-else>В корзину</template>
-      </app-button>
+      <app-input-number v-model="count" :min="1" :max="100" />
     </div>
   </article>
 </template>
 
 <style scoped lang="scss">
 .product {
-  padding: 5px;
-  max-width: 310px;
+  display: grid;
+  grid-template-columns: 40px 120px 1fr 150px 160px;
+  align-items: center;
 
-  &__icon-wrapper {
+  &__btn-wrapper {
     display: flex;
-    justify-content: flex-end;
-    width: 100%;
+    flex-direction: column;
+    gap: 30px;
+    opacity: 0.5;
   }
-  &__favorite {
+
+  &__btn {
     padding: 3px;
     height: 30px;
   }
 
   &__img {
-    margin-bottom: 35px;
+    max-width: 120px;
   }
 
   &__price {
-    margin-bottom: 10px;
-    font-weight: 700;
-    font-size: 24px;
+    text-align: center;
+    font-weight: 400;
+    font-size: 20px;
     color: var(--color-dark);
   }
 
   &__title {
-    margin-bottom: 15px;
-    font-weight: 600;
-    font-size: 28px;
+    padding-left: 20px;
+    font-weight: 400;
+    font-size: 22px;
     line-height: 130%;
   }
   &__actions {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 15px;
-  }
 
-  &__input {
-    width: 100%;
+    max-width: 275px;
+    gap: 15px;
   }
 }
 </style>

@@ -1,24 +1,19 @@
-<script setup lang="ts">
-import { isValidLabel } from '../../validators'
-
-defineProps({
-  label: {
-    type: String,
-    default: 'Жмак',
-    validator: isValidLabel,
-  },
-})
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <button class="btn">
-    {{ label }}
+    <slot></slot>
   </button>
 </template>
 
 <style scoped lang="scss">
 .btn {
-  padding: 16px 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 16px;
+
   width: 100%;
   max-height: 57px;
   color: var(--color-light);

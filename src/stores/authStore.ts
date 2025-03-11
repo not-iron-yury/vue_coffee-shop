@@ -1,20 +1,23 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { url } from '../API'
 import type { IUser, IFormData, IUserData } from '../inretfaces'
 import { useUserProductsStore } from './userProductsStore'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<IUser | null>(null)
-  const isAuthenticated = ref<boolean>(false)
+  const isAuthenticated = computed<boolean>(() => !!user.value)
   const userProductsStore = useUserProductsStore()
   const token = ref<string>('')
 
   const dataProcessing = (response: IUserData): void => {
     user.value = response.data
-    isAuthenticated.value = true
     token.value = response.token
     localStorage.setItem('token', response.token)
+  }
+
+  const handleError = (error: unknown) => {
+    handleError(error)
   }
 
   const register = async (data: IFormData): Promise<void> => {
@@ -30,14 +33,14 @@ export const useAuthStore = defineStore('auth', () => {
 
       if (!res.ok) throw new Error('В процессе регистрации возникла ошибка.')
 
-      const response = await res.json()
+      const response: IUserData = await res.json()
       dataProcessing(response)
 
       // после успешной регистрации создаем второй документ связанный с пользователем,
       // для хранения избранных товаров и товаров в корзине
       await userProductsStore.createUserProductsData(response.data.id)
     } catch (error) {
-      console.error(error)
+      handleError(error)
     }
   }
 
@@ -57,12 +60,12 @@ export const useAuthStore = defineStore('auth', () => {
 
       if (!res.ok) throw new Error('В процессе авторизации возникла ошибка.')
 
-      const response = await res.json()
+      const response: IUserData = await res.json()
       dataProcessing(response)
 
       await userProductsStore.getUserProductsData(response.data.id)
     } catch (error) {
-      console.error(error)
+      handleError(error)
     }
   }
 
@@ -76,9 +79,8 @@ export const useAuthStore = defineStore('auth', () => {
       })
       if (!res.ok) throw new Error('В процессе авторизации через токен возникла ошибка.')
 
-      const response = await res.json()
+      const response: IUser = await res.json()
       user.value = response
-      isAuthenticated.value = true
 
       // проверка id, является ли числом
       if (typeof user.value?.id === 'number') {
@@ -86,15 +88,15 @@ export const useAuthStore = defineStore('auth', () => {
       } else {
         console.warn('ID пользователя отсутствует или имеет неверный тип.')
       }
-    } catch (err) {
-      console.error(err)
+    } catch (error) {
+      console.error(error)
     }
   }
 
   const logout = (): void => {
     user.value = null
-    isAuthenticated.value = false
     localStorage.removeItem('token')
+    token.value = ''
   }
 
   return { user, isAuthenticated, register, login, logout, loginWithToken }

@@ -2,6 +2,17 @@
 import { RouterView } from 'vue-router'
 import AppHeader from './components/layout/AppHeader.vue'
 import AppFooter from './components/layout/AppFooter.vue'
+import { useAuthStore } from '@/stores/authStore'
+import { onMounted } from 'vue'
+
+const authStore = useAuthStore()
+
+onMounted(async () => {
+  const storedToken = localStorage.getItem('token')
+  if (storedToken) {
+    await authStore.loginWithToken(storedToken)
+  }
+})
 </script>
 
 <template>

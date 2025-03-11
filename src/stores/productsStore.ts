@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import { url } from '@/API'
+import { apiProducts } from '@/API/products'
 import type { IProduct } from '@/inretfaces'
 
 export const useProductsStore = defineStore('products', () => {
@@ -13,11 +13,7 @@ export const useProductsStore = defineStore('products', () => {
 
   const getProducts = async (): Promise<void> => {
     try {
-      const res = await fetch(url + '/items')
-      if (!res.ok) {
-        throw new Error('При попытке получить список товаров возникла ошибка.')
-      }
-      items.value = await res.json()
+      items.value = await apiProducts.get()
       createProducIndexes()
     } catch (err) {
       console.error(err)

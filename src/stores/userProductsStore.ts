@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
 import { reactive, computed } from 'vue'
-import { url } from '@/API'
 import type { IUserProducts, TlistName, TProductStatusProp, TCart } from '@/inretfaces'
 import { useAuthStore } from './authStore'
 import { useProductsStore } from '@/stores/productsStore'
 import { LIST_FAVORITES, LIST_CART } from '@/constants'
+import { apiUserProducts } from '@/API/userProducts'
 
 export const useUserProductsStore = defineStore('userProducts', () => {
   const authStore = useAuthStore()
@@ -16,24 +16,30 @@ export const useUserProductsStore = defineStore('userProducts', () => {
     cart: {},
   })
 
+  const handleError = (error: unknown) => {
+    console.log(error)
+  }
+
   /* ------------------------------------------------------------------------------- */
 
   // ДОБАВЛЕНИЕ товара в корзину
-  const addProductToCart = (productId: number, quantity: number = 1) => {
+  const addProductToCart = (
+    productId: number,
+    quantity: number = 1,
+    sendToServer: boolean = true,
+  ) => {
     if (!userProducts.cart.hasOwnProperty(productId)) {
       userProducts.cart[productId] = quantity // добавляем товар в cart
 
-      // --------------------- //
-
       const index = productsStore.productIndexMap.get(productId) // получаем индекс из кеша
       if (typeof index === 'number') {
-        productsStore.items[index]['count'] = quantity // меняем статус товара
+        productsStore.items[index]['count'] = quantity // меняем количество товара
       }
 
-      // --------------------- //
-
       toggleStatusProduct(productId, true, 'inCart') // меняем статус inCart
-      setUserProductsData(LIST_CART, userProducts.cart) // отправляем данные на сервер
+      if (sendToServer) {
+        setUserProductsData(LIST_CART, userProducts.cart) // отправляем данные на сервер
+      }
     }
   }
 
@@ -69,13 +75,13 @@ export const useUserProductsStore = defineStore('userProducts', () => {
     setUserProductsData(LIST_FAVORITES, userProducts.favorites)
   }
 
-  // ДОБАВЛЕНИЕ товара в избранные
+  // ДОБАВЛЕНИЕ товара в избранные (часть логики toggleFavoritesInUserProducts)
   const addProductToFavoriteList = (productId: number): void => {
-    userProducts.favorites.push(productId) // добавляем, если товара нет в списке
+    userProducts.favorites.push(productId)
     toggleStatusProduct(productId, true, 'inFavorites')
   }
 
-  // УДАЛЕНИЕ товара из избранных
+  // УДАЛЕНИЕ товара из избранных (часть логики toggleFavoritesInUserProducts)
   const removeProductFromFavoriteList = (productId: number): void => {
     const index = userProducts.favorites.indexOf(productId)
     userProducts.favorites.splice(index, 1)
@@ -100,24 +106,9 @@ export const useUserProductsStore = defineStore('userProducts', () => {
   // создаем на бэке объект для хранения данных товарах пользователя (после успешной регистрации !!)
   const createUserProductsData = async (userId: number): Promise<void> => {
     try {
-      const res = await fetch(url + '/userproducts', {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        // все что пользователь натыкал до регистрации, будет сохранено на бэке после успешной регистрации
-        body: JSON.stringify({
-          user_id: userId,
-          favorites: userProducts.favorites,
-          cart: userProducts.cart,
-        }),
-      })
-
-      if (!res.ok)
-        throw new Error('Ошибка при попытке создать данные о товарах нового пользователя.')
+      await apiUserProducts.createData(userId, userProducts.favorites, userProducts.cart)
     } catch (error) {
-      console.error(error)
+      handleError(error)
     }
   }
 
@@ -126,17 +117,10 @@ export const useUserProductsStore = defineStore('userProducts', () => {
   // ПОЛУЧЕНИЕ ДАННЫХ О ТОВАРАХ пользователя с бэка при авторизации
   const getUserProductsData = async (userId: number): Promise<void> => {
     try {
-      const res = await fetch(url + '/userproducts?user_id=' + userId)
-      if (!res.ok) {
-        throw new Error('Ошибка при попытке получить данные о товарах пользователя.')
-      }
-
-      const response = await res.json()
-      const data: IUserProducts = response[0]
-
-      synchUserProductLists(data) //  синхронизируем локальные и полученные данные
-    } catch (err) {
-      console.error(err)
+      const response: IUserProducts = await apiUserProducts.getData(userId)
+      synchUserProductLists(response) //  синхронизируем локальные и полученные данные
+    } catch (error) {
+      handleError(error)
     }
   }
 
@@ -146,42 +130,45 @@ export const useUserProductsStore = defineStore('userProducts', () => {
   const synchUserProductLists = (data: IUserProducts) => {
     userProducts.id = data.id
     userProducts.user_id = data.user_id
-
     synchUserFavorites(data.favorites)
     synchUserCart(data.cart)
   }
 
+  /* ------------------------------------------------------------------------------- */
+
   // СИНХРОНИЗАЦИЯ favorites
-  const synchUserFavorites = (favorites: number[]) => {
-    const isLocalData = favorites.length !== 0 ? true : false // наличие локальных данных favorites до авторизации
+  const synchUserFavorites = (data: number[]) => {
+    const isLocalDataFavorites = userProducts.favorites.length !== 0 ? true : false // наличие локальных данных favorites до авторизации
 
     // объединяем локальные и внешние данные
-    if (favorites.length !== 0) {
-      favorites.forEach((id) => {
+    if (data.length !== 0) {
+      data.forEach((id) => {
         if (!userProducts.favorites.includes(id)) {
           addProductToFavoriteList(id)
         }
       })
     }
     // обновляем список cart на бэке, если были натыканы товары до авторизации
-    if (isLocalData) {
+    if (isLocalDataFavorites) {
       setUserProductsData(LIST_FAVORITES, userProducts.favorites)
     }
   }
 
+  /* ------------------------------------------------------------------------------- */
+
   // СИНХРОНИЗАЦИЯ cart
-  const synchUserCart = (cart: TCart) => {
-    const isLocalData = Object.keys(userProducts.cart).length !== 0 ? true : false // наличие локальных данных cart до авторизации
+  const synchUserCart = (data: TCart) => {
+    const isLocalDataCart = Object.keys(userProducts.cart).length !== 0 ? true : false // наличие локальных данных cart до авторизации
 
     // объединяем локальные и внешние данные
-    const cartKeys: string[] = Object.keys(cart)
+    const cartKeys: string[] = Object.keys(data)
     if (cartKeys.length !== 0) {
       cartKeys.forEach((id: string) => {
-        addProductToCart(+id, cart[id])
+        addProductToCart(+id, data[id], false)
       })
     }
     // обновляем список cart на бэке, если были натыканы товары до авторизации
-    if (isLocalData) {
+    if (isLocalDataCart) {
       setUserProductsData(LIST_CART, userProducts.cart)
     }
   }
@@ -192,21 +179,10 @@ export const useUserProductsStore = defineStore('userProducts', () => {
   const setUserProductsData = async (listName: TlistName, newList: number[] | TCart) => {
     try {
       if (authStore.user) {
-        const res = await fetch(`${url}/userproducts/${authStore.user.id}`, {
-          method: 'PATCH',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            [listName]: newList,
-          }),
-        })
-
-        if (!res.ok) throw new Error('В процессе регистрации возникла ошибка.')
+        await apiUserProducts.setData(authStore.user, listName, newList)
       }
     } catch (error) {
-      console.error(error)
+      handleError(error)
     }
   }
 

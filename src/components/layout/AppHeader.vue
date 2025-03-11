@@ -2,7 +2,7 @@
 import { RouterLink } from 'vue-router'
 import AppPopUp from '../AppPopUp.vue'
 import AppFormAuth from '../AppFormAuth.vue'
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { getScrollbarWidth, addOverflowHidden } from '@/functions'
 import { useAuthStore } from '@/stores/authStore'
 import { useUserProductsStore } from '@/stores/userProductsStore'
@@ -28,6 +28,16 @@ const authhandler = (): void => {
     openAuth()
   }
 }
+
+onMounted(() => {
+  if (!authStore.isAuthenticated) {
+    const token = localStorage.getItem('token')
+    console.log(token)
+    if (typeof token === 'string' && typeof token !== undefined) {
+      authStore.loginWithToken(token)
+    }
+  }
+})
 </script>
 
 <template>

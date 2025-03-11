@@ -8,10 +8,12 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref<IUser | null>(null)
   const isAuthenticated = ref<boolean>(false)
   const userProductsStore = useUserProductsStore()
+  const token = ref<string>('')
 
   const dataProcessing = (response: IUserData): void => {
     user.value = response.data
     isAuthenticated.value = true
+    token.value = response.token
     localStorage.setItem('token', response.token)
   }
 
@@ -64,11 +66,36 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  const loginWithToken = async (token: string): Promise<void> => {
+    try {
+      const res = await fetch(url + '/auth_me', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (!res.ok) throw new Error('В процессе авторизации через токен возникла ошибка.')
+
+      const response = await res.json()
+      user.value = response
+      isAuthenticated.value = true
+
+      // проверка id, является ли числом
+      if (typeof user.value?.id === 'number') {
+        userProductsStore.getUserProductsData(user.value.id) // ожидает числовой тип
+      } else {
+        console.warn('ID пользователя отсутствует или имеет неверный тип.')
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   const logout = (): void => {
     user.value = null
     isAuthenticated.value = false
     localStorage.removeItem('token')
   }
 
-  return { user, isAuthenticated, register, login, logout }
+  return { user, isAuthenticated, register, login, logout, loginWithToken }
 })

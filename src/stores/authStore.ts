@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { url } from '../API'
 import type { IUser, IFormData, IUserData } from '../inretfaces'
 import { useUserProductsStore } from './userProductsStore'
+import { apiAuth } from '@/API/auth'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<IUser | null>(null)
@@ -17,23 +17,12 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const handleError = (error: unknown) => {
-    handleError(error)
+    console.log(error)
   }
 
-  const register = async (data: IFormData): Promise<void> => {
+  const register = async (data: IFormData) => {
     try {
-      const res = await fetch(url + '/register', {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-
-      if (!res.ok) throw new Error('В процессе регистрации возникла ошибка.')
-
-      const response: IUserData = await res.json()
+      const response: IUserData = await apiAuth.register(data)
       dataProcessing(response)
 
       // после успешной регистрации создаем второй документ связанный с пользователем,
@@ -46,21 +35,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const login = async (data: IFormData): Promise<void> => {
     try {
-      const res = await fetch(url + '/auth', {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-        }),
-      })
-
-      if (!res.ok) throw new Error('В процессе авторизации возникла ошибка.')
-
-      const response: IUserData = await res.json()
+      const response: IUserData = await apiAuth.login(data)
       dataProcessing(response)
 
       await userProductsStore.getUserProductsData(response.data.id)
@@ -71,15 +46,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const loginWithToken = async (token: string): Promise<void> => {
     try {
-      const res = await fetch(url + '/auth_me', {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      if (!res.ok) throw new Error('В процессе авторизации через токен возникла ошибка.')
-
-      const response: IUser = await res.json()
+      const response: IUser = await apiAuth.loginWithToken(token)
       user.value = response
 
       // проверка id, является ли числом

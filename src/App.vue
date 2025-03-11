@@ -5,9 +5,15 @@ import AppFooter from './components/layout/AppFooter.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { onMounted } from 'vue'
 
+import { useProductsStore } from '@/stores/productsStore'
+
+const productsStore = useProductsStore()
+
 const authStore = useAuthStore()
 
 onMounted(async () => {
+  await productsStore.getProducts()
+
   const storedToken = localStorage.getItem('token')
   if (storedToken) {
     await authStore.loginWithToken(storedToken)

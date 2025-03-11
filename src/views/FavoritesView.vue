@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { computed } from 'vue'
 import ProductCard from '../components/ProductCard.vue'
 import { useProductsStore } from '@/stores/productsStore'
 import { useUserProductsStore } from '@/stores/userProductsStore'
@@ -7,17 +7,9 @@ import type { IProduct } from '@/inretfaces'
 
 const productsStore = useProductsStore()
 const userProductsStore = useUserProductsStore()
-const favorites = ref<IProduct[]>([])
 
-onMounted(async () => {
-  if (productsStore.items.length === 0) {
-    await productsStore.getProducts()
-  }
-  favorites.value = getFavorites()
-})
-
-const getFavorites = (): IProduct[] => {
-  const productIndexMap: Map<number, number> = productsStore.productIndexMap // коллекция индексов товаров
+const favorites = computed<IProduct[]>(() => {
+  const productIndexMap = productsStore.productIndexMap // коллекция индексов товаров
 
   return userProductsStore.userProducts.favorites
     .map((id) => {
@@ -32,7 +24,7 @@ const getFavorites = (): IProduct[] => {
       }
     })
     .filter((product): product is IProduct => product !== null)
-}
+})
 </script>
 
 <template>

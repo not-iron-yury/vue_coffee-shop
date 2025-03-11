@@ -1,15 +1,8 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
 import ProductCard from '../components/ProductCard.vue'
 import { useProductsStore } from '@/stores/productsStore'
 
 const productsStore = useProductsStore()
-
-onMounted(async () => {
-  if (productsStore.items.length === 0) {
-    await productsStore.getProducts()
-  }
-})
 </script>
 
 <template>

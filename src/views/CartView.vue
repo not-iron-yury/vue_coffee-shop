@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import ProductCardInCart from '@/components/ProductCardInCart.vue'
 import { useProductsStore } from '@/stores/productsStore'
 import { useUserProductsStore } from '@/stores/userProductsStore'
@@ -9,7 +9,7 @@ const productsStore = useProductsStore()
 const userProductsStore = useUserProductsStore()
 
 const cartItems = computed<IProduct[]>(() => {
-  const productIndexMap = productsStore.productIndexMap // коллекция индексов товаров
+  const productIndexMap: Map<number, number> = productsStore.productIndexMap // коллекция индексов товаров
 
   return Object.keys(userProductsStore.userProducts.cart)
     .map((id) => {
@@ -22,12 +22,6 @@ const cartItems = computed<IProduct[]>(() => {
       }
     })
     .filter((product) => product !== null)
-})
-
-onMounted(async () => {
-  if (productsStore.items.length === 0) {
-    await productsStore.getProducts()
-  }
 })
 </script>
 

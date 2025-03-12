@@ -1,12 +1,19 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import ProductCard from '../components/ProductCard.vue'
+import AppCatalogSort from '@/components/UI/AppCatalogSort.vue'
 import { useProductsStore } from '@/stores/productsStore'
 
 const productsStore = useProductsStore()
+
+const typeOfSorting = ref<string>('')
 </script>
 
 <template>
-  <h1 class="title-h1">Каталог</h1>
+  <section class="top">
+    <h1 class="title-h1">Каталог</h1>
+    <app-catalog-sort v-model="typeOfSorting" />
+  </section>
   <section class="products">
     <ul class="products__list">
       <li v-for="(item, i) in productsStore.items" :key="i" class="products__item">
@@ -17,6 +24,10 @@ const productsStore = useProductsStore()
 </template>
 
 <style scoped lang="scss">
+.top {
+  display: flex;
+  justify-content: space-between;
+}
 .products {
   padding: 100px 0;
 

@@ -27,13 +27,16 @@ const count = computed({
     }
   },
 })
+
+const inFavorite = computed(() => userProductsStore.getStatusProductInFavoIrites(props.data.id))
+const inCart = computed(() => userProductsStore.getStatusProductInCart(props.data.id))
 </script>
 
 <template>
   <article class="product" v-cloak>
     <div class="product__icon-wrapper">
       <app-favorite-status
-        :isFavorite="data.inFavorites"
+        :isFavorite="inFavorite"
         class="product__favorite"
         @click="userProductsStore.toggleFavoritesInUserProducts(data.id)"
       />
@@ -42,15 +45,9 @@ const count = computed({
     <p class="product__price">{{ data.price }} руб.</p>
     <h3 class="product__title">{{ data.title }}, {{ data.weight }} г</h3>
     <div class="product__actions">
-      <app-input-number
-        v-model="count"
-        :min="0"
-        :max="100"
-        v-if="data.inCart"
-        class="product__input"
-      />
-      <app-button :disabled="data.inCart" @click="userProductsStore.addProductToCart(data.id)">
-        <template v-if="data.inCart"><img src="/cart.svg" /></template>
+      <app-input-number v-model="count" :min="0" :max="100" v-if="inCart" class="product__input" />
+      <app-button :disabled="inCart" @click="userProductsStore.addProductToCart(data.id)">
+        <template v-if="inCart"><img src="/cart.svg" /></template>
         <template v-else>В корзину</template>
       </app-button>
     </div>

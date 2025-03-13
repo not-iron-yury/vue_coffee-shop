@@ -26,13 +26,15 @@ const count = computed({
     }
   },
 })
+
+const inFavorite = computed(() => userProductsStore.getStatusProductInFavoIrites(props.data.id))
 </script>
 
 <template>
   <article class="product" v-cloak>
     <div class="product__btn-wrapper">
       <app-favorite-status
-        :isFavorite="data.inFavorites"
+        :isFavorite="inFavorite"
         class="product__btn"
         @click="userProductsStore.toggleFavoritesInUserProducts(data.id)"
       />

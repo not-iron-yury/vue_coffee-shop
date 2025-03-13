@@ -17,26 +17,27 @@ export const useUserProductsStore = defineStore('userProducts', () => {
   const favoritesList = ref<IProduct[] | null>(null)
   const cartList = ref<IProduct[] | null>(null)
 
-  watch(userProducts.favorites, async () => {
-    try {
-      const queryTail = userProducts.favorites.map((item) => `id[]=${item}`).join('&')
-      favoritesList.value = await apiUserProducts.getProducts(queryTail)
-    } catch (error) {
-      handleError(error)
-    }
-  })
+  watch(
+    [userProducts.favorites, userProducts.cart],
+    async ([favorites, cart]) => {
+      try {
+        if (favorites.length > 0) {
+          const favoritesQuery = favorites.map((item) => `id[]=${item}`).join('&')
+          favoritesList.value = await apiUserProducts.getProducts(favoritesQuery)
+        }
 
-  watch(userProducts.cart, async () => {
-    try {
-      const queryTail = Object.keys(userProducts.cart)
-        .map((item) => `id[]=${item}`)
-        .join('&')
-      cartList.value = await apiUserProducts.getProducts(queryTail)
-    } catch (error) {
-      handleError(error)
-    }
-  })
-
+        if (Object.keys(cart).length > 0) {
+          const cartQuery = Object.keys(cart)
+            .map((item) => `id[]=${item}`)
+            .join('&')
+          cartList.value = await apiUserProducts.getProducts(cartQuery)
+        }
+      } catch (error) {
+        handleError(error)
+      }
+    },
+    { immediate: true },
+  )
   /* ------------------------------------------------------------------------------- */
 
   // создаем на бэке объект для хранения данных товарах пользователя (после успешной регистрации !!)

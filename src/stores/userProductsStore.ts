@@ -1,18 +1,43 @@
 import { defineStore } from 'pinia'
-import { reactive, computed } from 'vue'
-import type { IUserProducts, TlistName, TCart } from '@/inretfaces'
+import { ref, reactive, computed, watch } from 'vue'
+import type { IProduct, IUserProducts, TlistName, TCart } from '@/inretfaces'
 import { useAuthStore } from './authStore'
 import { LIST_FAVORITES, LIST_CART } from '@/constants'
 import { apiUserProducts } from '@/API/userProducts'
 
 export const useUserProductsStore = defineStore('userProducts', () => {
   const authStore = useAuthStore()
+
   const userProducts = reactive<IUserProducts>({
     id: 0,
     user_id: 0,
     favorites: [],
     cart: {},
   })
+  const favoritesList = ref<IProduct[] | null>(null)
+  const cartList = ref<IProduct[] | null>(null)
+
+  watch(userProducts.favorites, async () => {
+    try {
+      const queryTail = userProducts.favorites.map((item) => `id[]=${item}`).join('&')
+      favoritesList.value = await apiUserProducts.getProducts(queryTail)
+    } catch (error) {
+      handleError(error)
+    }
+  })
+
+  watch(userProducts.cart, async () => {
+    try {
+      const queryTail = Object.keys(userProducts.cart)
+        .map((item) => `id[]=${item}`)
+        .join('&')
+      cartList.value = await apiUserProducts.getProducts(queryTail)
+    } catch (error) {
+      handleError(error)
+    }
+  })
+
+  /* ------------------------------------------------------------------------------- */
 
   // создаем на бэке объект для хранения данных товарах пользователя (после успешной регистрации !!)
   const createUserProductsData = async (userId: number): Promise<void> => {
@@ -182,6 +207,8 @@ export const useUserProductsStore = defineStore('userProducts', () => {
 
   return {
     userProducts,
+    favoritesList,
+    cartList,
     toggleFavoritesInUserProducts,
     createUserProductsData,
     getUserProductsData,

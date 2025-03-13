@@ -1,5 +1,5 @@
 import { url } from '@/API/url'
-import type { IUser, IUserProducts, TCart, TlistName } from '@/inretfaces'
+import type { IProduct, IUser, IUserProducts, TCart, TlistName } from '@/inretfaces'
 
 export const apiUserProducts = {
   createData: async (userId: number, favorites: number[], cart: TCart) => {
@@ -44,5 +44,16 @@ export const apiUserProducts = {
     })
 
     if (!res.ok) throw new Error('В процессе регистрации возникла ошибка.')
+  },
+
+  getProducts: async (queryTail: string) => {
+    const res = await fetch(url + '/items?' + queryTail)
+
+    if (!res.ok) {
+      throw new Error('При попытке получить список товаров пользователя возникла ошибочка.')
+    }
+
+    const response: IProduct[] = await res.json()
+    return response
   },
 }

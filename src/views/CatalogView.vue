@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import ProductCard from '../components/ProductCard.vue'
 import AppCatalogSort from '@/components/UI/AppCatalogSort.vue'
 import { useProductsStore } from '@/stores/productsStore'
 
 const productsStore = useProductsStore()
-
 const typeOfSorting = ref<string>('')
+
+onMounted(async () => {
+  await productsStore.loadProducts()
+})
 </script>
 
 <template>

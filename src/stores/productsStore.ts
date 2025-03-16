@@ -17,9 +17,9 @@ export const useProductsStore = defineStore('products', () => {
     }
   }
   const loadBestProducts = async (): Promise<void> => {
-    if (!items.value.length) {
+    if (!itemsBest.value.length) {
       try {
-        itemsBest.value = await apiProducts.get()
+        itemsBest.value = await apiProducts.getBest()
       } catch (error) {
         console.error(error)
       }

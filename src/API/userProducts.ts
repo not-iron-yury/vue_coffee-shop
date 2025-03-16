@@ -47,6 +47,7 @@ export const apiUserProducts = {
   },
 
   getProducts: async (queryTail: string) => {
+    // const res = await fetch(url + '/items?' + queryTail + '&sortBy=-price') // можно прикрутить сортировку в корзине и избранном
     const res = await fetch(url + '/items?' + queryTail)
 
     if (!res.ok) {

@@ -19,7 +19,7 @@ onMounted(async () => {
   </section>
   <section class="products">
     <ul class="products__list">
-      <li v-for="(item, i) in productsStore.items" :key="i" class="products__item">
+      <li v-for="item in productsStore.items" :key="item.id" class="products__item">
         <ProductCard :data="item" />
       </li>
     </ul>

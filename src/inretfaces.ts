@@ -38,3 +38,8 @@ export type TCart = { [key: string]: number }
 
 export type TlistName = 'favorites' | 'cart'
 export type TProductStatusProp = 'inFavorites' | 'inCart'
+
+type TSortingKey = 'price' | 'weight' // типы названий свойств, по которым выполняется сортировка
+type TSortingValue = 'maxtomin' | 'mintomax' // типы для направлений сортировки
+export type TSortingType = `${TSortingKey}-${TSortingValue}` // тип сортировки
+// export type TSortingType = 'price-maxtomin' | 'price-mintomax' | 'weight-maxtomin' | 'weight-mintomax'

@@ -1,12 +1,22 @@
 <script setup lang="ts">
 import ProductCardInCart from '@/components/ProductCardInCart.vue'
 import { useUserProductsStore } from '@/stores/userProductsStore'
+import AppSortSector from '@/components/UI/AppSortSector.vue'
+import type { TSortingType } from '@/inretfaces'
 
 const userProductsStore = useUserProductsStore()
+
+const sortCartList = (type: TSortingType) => {
+  userProductsStore.sortingCart('cart', type)
+}
 </script>
 
 <template>
-  <h1 class="title-h1">Корзина</h1>
+  <section class="top">
+    <h1 class="title-h1">Корзина</h1>
+    <app-sort-sector @sortingType="sortCartList" />
+  </section>
+
   <section class="products">
     <ul class="products__list">
       <li v-for="(item, i) in userProductsStore.cartList" :key="i" class="products__item">
@@ -17,6 +27,11 @@ const userProductsStore = useUserProductsStore()
 </template>
 
 <style scoped lang="scss">
+.top {
+  display: flex;
+  justify-content: space-between;
+}
+
 .products {
   padding: 100px 0;
 

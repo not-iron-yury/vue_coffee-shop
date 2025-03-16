@@ -1,21 +1,22 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import ProductCard from '../components/ProductCard.vue'
-import AppCatalogSort from '@/components/UI/AppCatalogSort.vue'
+import AppSortSector from '@/components/UI/AppSortSector.vue'
 import { useProductsStore } from '@/stores/productsStore'
 
 const productsStore = useProductsStore()
-const typeOfSorting = ref<string>('')
 
 onMounted(async () => {
   await productsStore.loadProducts()
 })
+
+const handleSort = () => {}
 </script>
 
 <template>
   <section class="top">
     <h1 class="title-h1">Каталог</h1>
-    <app-catalog-sort v-model="typeOfSorting" />
+    <app-sort-sector @sortingType="handleSort" />
   </section>
   <section class="products">
     <ul class="products__list">

@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref, reactive, computed, watch } from 'vue'
-import type { IProduct, IUserProducts, TlistName, TCart } from '@/inretfaces'
 import { useAuthStore } from './authStore'
 import { LIST_FAVORITES, LIST_CART } from '@/constants'
 import { apiUserProducts } from '@/API/userProducts'
+import type { IProduct, IUserProducts, TlistName, TCart, TSortingType } from '@/inretfaces'
 
 export const useUserProductsStore = defineStore('userProducts', () => {
   const authStore = useAuthStore()
@@ -17,6 +17,28 @@ export const useUserProductsStore = defineStore('userProducts', () => {
   const favoritesList = ref<IProduct[] | null>(null)
   const cartList = ref<IProduct[] | null>(null)
 
+  /* ------------------------------------------------------------------------------- */
+
+  const sortingCart = (name: string, type: TSortingType) => {
+    const list = name === 'cart' ? cartList : favoritesList
+    if (!list.value) return
+
+    const [prop, value] = type.split('-')
+
+    if (value === 'maxtomin') {
+      list.value.sort(
+        (a: IProduct, b: IProduct) =>
+          (b[prop as keyof IProduct] as number) - (a[prop as keyof IProduct] as number),
+      )
+    } else {
+      list.value.sort(
+        (a: IProduct, b: IProduct) =>
+          (a[prop as keyof IProduct] as number) - (b[prop as keyof IProduct] as number),
+      )
+    }
+  }
+
+  /* ------------------------------------------------------------------------------- */
   watch(
     [userProducts.favorites, userProducts.cart],
     async ([favorites, cart]) => {
@@ -38,6 +60,7 @@ export const useUserProductsStore = defineStore('userProducts', () => {
     },
     { immediate: true },
   )
+
   /* ------------------------------------------------------------------------------- */
 
   // создаем на бэке объект для хранения данных товарах пользователя (после успешной регистрации !!)
@@ -217,8 +240,9 @@ export const useUserProductsStore = defineStore('userProducts', () => {
     addProductToCart,
     removeProductFromCart,
     changeProductQuantityInCart,
-    getProductCountInCart,
     getStatusProductInFavoIrites,
+    getProductCountInCart,
     getStatusProductInCart,
+    sortingCart,
   }
 })

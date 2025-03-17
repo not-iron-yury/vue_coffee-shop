@@ -14,29 +14,46 @@ export const useUserProductsStore = defineStore('userProducts', () => {
     favorites: [],
     cart: {},
   })
+
   const favoritesList = ref<IProduct[] | null>(null)
   const cartList = ref<IProduct[] | null>(null)
 
-  /* ------------------------------------------------------------------------------- */
+  const favoritesSortingType = ref<TSortingType | null>(null)
+  const cartSortingType = ref<TSortingType | null>(null)
 
-  const sortingCart = (name: string, type: TSortingType) => {
-    const list = name === 'cart' ? cartList : favoritesList
-    if (!list.value) return
+  const sortedFavoritesList = computed(() => {
+    if (!favoritesList.value || !favoritesSortingType.value) return favoritesList.value ?? []
 
-    const [prop, value] = type.split('-')
+    const [prop, direction] = favoritesSortingType.value.split('-')
 
-    if (value === 'maxtomin') {
-      list.value.sort(
-        (a: IProduct, b: IProduct) =>
-          (b[prop as keyof IProduct] as number) - (a[prop as keyof IProduct] as number),
-      )
-    } else {
-      list.value.sort(
-        (a: IProduct, b: IProduct) =>
-          (a[prop as keyof IProduct] as number) - (b[prop as keyof IProduct] as number),
-      )
-    }
-  }
+    return [...favoritesList.value].sort((a: IProduct, b: IProduct) => {
+      const itemA = a[prop as keyof IProduct]
+      const itemB = b[prop as keyof IProduct]
+
+      if (direction === 'maxtomin') {
+        return (itemB as number) - (itemA as number)
+      } else {
+        return (itemA as number) - (itemB as number)
+      }
+    })
+  })
+
+  const sortedCartList = computed(() => {
+    if (!cartList.value || !cartSortingType.value) return cartList.value ?? []
+
+    const [prop, direction] = cartSortingType.value.split('-')
+
+    return [...cartList.value].sort((a: IProduct, b: IProduct) => {
+      const itemA = a[prop as keyof IProduct]
+      const itemB = b[prop as keyof IProduct]
+
+      if (direction === 'maxtomin') {
+        return (itemB as number) - (itemA as number)
+      } else {
+        return (itemA as number) - (itemB as number)
+      }
+    })
+  })
 
   /* ------------------------------------------------------------------------------- */
   watch(
@@ -232,7 +249,6 @@ export const useUserProductsStore = defineStore('userProducts', () => {
   return {
     userProducts,
     favoritesList,
-    cartList,
     toggleFavoritesInUserProducts,
     createUserProductsData,
     getUserProductsData,
@@ -243,6 +259,9 @@ export const useUserProductsStore = defineStore('userProducts', () => {
     getStatusProductInFavoIrites,
     getProductCountInCart,
     getStatusProductInCart,
-    sortingCart,
+    cartSortingType,
+    favoritesSortingType,
+    sortedFavoritesList,
+    sortedCartList,
   }
 })

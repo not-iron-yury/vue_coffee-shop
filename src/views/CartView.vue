@@ -6,20 +6,20 @@ import type { TSortingType } from '@/inretfaces'
 
 const userProductsStore = useUserProductsStore()
 
-const sortCartList = (type: TSortingType) => {
-  userProductsStore.sortingCart('cart', type)
+const handleSortSelect = (type: TSortingType) => {
+  userProductsStore.cartSortingType = type
 }
 </script>
 
 <template>
   <section class="top">
     <h1 class="title-h1">Корзина</h1>
-    <app-sort-sector @sortingType="sortCartList" />
+    <app-sort-sector @sortingType="handleSortSelect" />
   </section>
 
   <section class="products">
     <ul class="products__list">
-      <li v-for="(item, i) in userProductsStore.cartList" :key="i" class="products__item">
+      <li v-for="(item, i) in userProductsStore.sortedCartList" :key="i" class="products__item">
         <ProductCardInCart :data="item" />
       </li>
     </ul>

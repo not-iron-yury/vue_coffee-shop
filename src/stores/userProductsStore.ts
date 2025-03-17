@@ -252,7 +252,6 @@ export const useUserProductsStore = defineStore('userProducts', () => {
     toggleFavoritesInUserProducts,
     createUserProductsData,
     getUserProductsData,
-    setUserProductsData,
     addProductToCart,
     removeProductFromCart,
     changeProductQuantityInCart,

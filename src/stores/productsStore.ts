@@ -1,21 +1,24 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { apiProducts } from '@/API/products'
-import type { IProduct } from '@/inretfaces'
+import type { IProduct, TSortingType } from '@/inretfaces'
 
 export const useProductsStore = defineStore('products', () => {
   const items = ref<IProduct[]>([])
   const itemsBest = ref<IProduct[]>([])
 
+  const itemsSortingType = ref<TSortingType | null>(null)
+
   const loadProducts = async (): Promise<void> => {
-    if (!items.value.length) {
-      try {
-        items.value = await apiProducts.get()
-      } catch (error) {
-        console.error(error)
-      }
+    try {
+      items.value = await apiProducts.get(itemsSortingType.value)
+    } catch (error) {
+      console.error(error)
     }
   }
+
+  watch(itemsSortingType, loadProducts)
+
   const loadBestProducts = async (): Promise<void> => {
     if (!itemsBest.value.length) {
       try {
@@ -26,5 +29,5 @@ export const useProductsStore = defineStore('products', () => {
     }
   }
 
-  return { items, itemsBest, loadProducts, loadBestProducts }
+  return { items, itemsBest, loadProducts, loadBestProducts, itemsSortingType }
 })

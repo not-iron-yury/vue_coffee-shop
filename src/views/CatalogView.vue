@@ -3,14 +3,19 @@ import { onMounted } from 'vue'
 import ProductCard from '../components/ProductCard.vue'
 import AppSortSector from '@/components/UI/AppSortSector.vue'
 import { useProductsStore } from '@/stores/productsStore'
+import type { TSortingType } from '@/inretfaces'
 
 const productsStore = useProductsStore()
 
 onMounted(async () => {
-  await productsStore.loadProducts()
+  if (productsStore.items.length === 0) {
+    await productsStore.loadProducts()
+  }
 })
 
-const handleSort = () => {}
+const handleSort = (type: TSortingType) => {
+  productsStore.itemsSortingType = type
+}
 </script>
 
 <template>

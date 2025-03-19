@@ -17,6 +17,7 @@ export const useUserProductsStore = defineStore('userProducts', () => {
 
   const favoritesList = ref<IProduct[] | null>(null)
   const cartList = ref<IProduct[] | null>(null)
+  let prevCartKeysCount: number = 0 // текущее количество id в userProducts.cart  (необходимо для функции cartChange)
 
   const favoritesSortingType = ref<TSortingType | null>(null)
   const cartSortingType = ref<TSortingType | null>(null)
@@ -56,28 +57,35 @@ export const useUserProductsStore = defineStore('userProducts', () => {
   })
 
   /* ------------------------------------------------------------------------------- */
-  watch(
-    [userProducts.favorites, userProducts.cart],
-    async ([favorites, cart]) => {
-      try {
-        if (favorites.length > 0) {
-          const favoritesQuery = favorites.map((item) => `id[]=${item}`).join('&')
-          favoritesList.value = await apiUserProducts.getProducts(favoritesQuery)
-        }
 
-        if (Object.keys(cart).length > 0) {
-          const cartQuery = Object.keys(cart)
-            .map((item) => `id[]=${item}`)
-            .join('&')
-          cartList.value = await apiUserProducts.getProducts(cartQuery)
-        }
+  watch(userProducts.favorites, async (favorites) => {
+    try {
+      const favoritesQuery = favorites.map((id) => `id[]=${id}`).join('&')
+      favoritesList.value = await apiUserProducts.getProducts(favoritesQuery)
+    } catch (error) {
+      handleError(error)
+    }
+  })
+
+  const cartChange = async (newVal: TCart) => {
+    const keysNew = Object.keys(newVal)
+    // запрашиваем данные ТОЛЬКО если меняются ключи в userProducts.cart (список id товаров в корзине)
+    // и игнорим изменение значений этих ключей (количество товара в корзине)
+    if (keysNew.length !== prevCartKeysCount) {
+      try {
+        const cartQuery = Object.keys(newVal)
+          .map((id) => `id[]=${id}`)
+          .join('&')
+        cartList.value = await apiUserProducts.getProducts(cartQuery)
       } catch (error) {
         handleError(error)
       }
-    },
-    { immediate: true },
-  )
 
+      prevCartKeysCount = keysNew.length // обновляем значение последнего числа id в userProducts.cart
+    }
+  }
+
+  watch(userProducts.cart, cartChange)
   /* ------------------------------------------------------------------------------- */
 
   // создаем на бэке объект для хранения данных товарах пользователя (после успешной регистрации !!)
@@ -189,6 +197,11 @@ export const useUserProductsStore = defineStore('userProducts', () => {
     if (!userProducts.cart.hasOwnProperty(productId)) {
       userProducts.cart[productId] = quantity // добавляем товар в cart
 
+      const productInCart = cartList.value?.find((itm) => itm.id === productId)
+      if (productInCart) {
+        productInCart.count = quantity
+      }
+
       if (sendToServer) {
         setUserProductsData(LIST_CART, userProducts.cart) // отправляем данные на сервер
       }
@@ -207,9 +220,10 @@ export const useUserProductsStore = defineStore('userProducts', () => {
   }
 
   //ИЗМЕНЕНИЕ КОЛИЧЕСТВА товарной позиции
-  const changeProductQuantityInCart = (productId: number, quantity: number) => {
-    if (userProducts.cart.hasOwnProperty(productId)) {
-      userProducts.cart[productId] = quantity
+  const changeProductQuantityInCart = (product: IProduct, quantity: number) => {
+    if (userProducts.cart.hasOwnProperty(product.id)) {
+      userProducts.cart[product.id] = quantity
+      //product.count = quantity
     }
     setUserProductsData(LIST_CART, userProducts.cart) // отправляем данные на сервер
   }
@@ -249,6 +263,7 @@ export const useUserProductsStore = defineStore('userProducts', () => {
   return {
     userProducts,
     favoritesList,
+    cartList,
     toggleFavoritesInUserProducts,
     createUserProductsData,
     getUserProductsData,

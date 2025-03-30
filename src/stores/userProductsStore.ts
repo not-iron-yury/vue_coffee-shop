@@ -197,6 +197,7 @@ export const useUserProductsStore = defineStore('userProducts', () => {
     if (!userProducts.cart.hasOwnProperty(productId)) {
       userProducts.cart[productId] = quantity // добавляем товар в cart
 
+      console.log(cartList.value)
       const productInCart = cartList.value?.find((itm) => itm.id === productId)
       if (productInCart) {
         productInCart.count = quantity
@@ -223,7 +224,7 @@ export const useUserProductsStore = defineStore('userProducts', () => {
   const changeProductQuantityInCart = (product: IProduct, quantity: number) => {
     if (userProducts.cart.hasOwnProperty(product.id)) {
       userProducts.cart[product.id] = quantity
-      //product.count = quantity
+      product.count = quantity
     }
     setUserProductsData(LIST_CART, userProducts.cart) // отправляем данные на сервер
   }

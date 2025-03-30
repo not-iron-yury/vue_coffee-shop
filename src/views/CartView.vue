@@ -23,6 +23,7 @@ const handleSortSelect = (type: TSortingType) => {
         <ProductCardInCart :data="item" />
       </li>
     </ul>
+    <p>{{ userProductsStore.cartList }}</p>
   </section>
 </template>
 

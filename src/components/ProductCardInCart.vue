@@ -20,7 +20,7 @@ const count = computed({
   get: () => userProductsStore.getProductCountInCart(props.data.id), // связывает карточку со своим значением в userProductsStore
   set: (value) => {
     if (value > 0) {
-      userProductsStore.changeProductQuantityInCart(props.data.id, value)
+      userProductsStore.changeProductQuantityInCart(props.data, value)
     } else {
       userProductsStore.removeProductFromCart(props.data.id)
     }
@@ -45,7 +45,10 @@ const inFavorite = computed(() => userProductsStore.getStatusProductInFavoIrites
     </div>
     <img class="product__img" :src="`/img/products/${data.img}`" aria-hidden="true" />
     <h3 class="product__title">{{ data.title }}, {{ data.weight }} г</h3>
-    <p class="product__price">{{ data.price }} руб.</p>
+    <div class="product__prices">
+      <p class="product__price-sum">{{ count * data.price }} руб.</p>
+      <p class="product__price-one">{{ data.price }} руб. / 1шт</p>
+    </div>
     <div class="product__actions">
       <app-input-number v-model="count" :min="1" :max="100" />
     </div>
@@ -74,11 +77,24 @@ const inFavorite = computed(() => userProductsStore.getStatusProductInFavoIrites
     max-width: 120px;
   }
 
-  &__price {
+  &__prices {
+    position: relative;
     text-align: center;
+  }
+
+  &__price-sum {
     font-weight: 400;
     font-size: 20px;
     color: var(--color-dark);
+  }
+  &__price-one {
+    position: absolute;
+    top: 25px;
+    left: 50%;
+    width: 100%;
+    transform: translateX(-50%);
+    font-size: 15px;
+    color: rgb(158, 158, 158);
   }
 
   &__title {

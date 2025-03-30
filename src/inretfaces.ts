@@ -5,8 +5,6 @@ export interface IProduct {
   img: string
   weight: number
   topSelling: boolean
-  inFavorites?: boolean
-  inCart?: boolean
   count?: number
 }
 
